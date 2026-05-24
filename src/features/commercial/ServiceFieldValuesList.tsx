@@ -1,6 +1,7 @@
-import type {
-  BookingServiceFieldDefinition,
-  ServiceFieldValues,
+import {
+  formatDatetimeDisplay,
+  type BookingServiceFieldDefinition,
+  type ServiceFieldValues,
 } from "@/shared/commercial/service-fields"
 
 type ServiceFieldValuesListProps = {
@@ -21,7 +22,13 @@ export function ServiceFieldValuesList({
       {fields.map((field) => (
         <div key={field.key}>
           <dt className="text-muted-foreground">{field.label}</dt>
-          <dd>{values[field.key]?.trim() ? values[field.key] : "—"}</dd>
+          <dd>
+            {field.type === "datetime"
+              ? formatDatetimeDisplay(values[field.key])
+              : values[field.key]?.trim()
+                ? values[field.key]
+                : "—"}
+          </dd>
         </div>
       ))}
     </dl>

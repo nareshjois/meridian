@@ -2,6 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router"
 
 import { loadJournalIndexFn } from "@/server/services/accounting/loaders"
 import { PERMISSION_KEYS, assertPermission } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/accounting/journal/")({
   staticData: {
@@ -19,13 +20,6 @@ export const Route = createFileRoute("/app/accounting/journal/")({
     }),
   component: JournalIndexPage,
 })
-
-function formatCents(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100)
-}
 
 function JournalIndexPage() {
   const { data } = Route.useLoaderData()
@@ -76,7 +70,7 @@ function JournalIndexPage() {
                     : "—"}
                 </td>
                 <td className="px-4 py-2 text-right">
-                  {formatCents(entry.totalDebitCents)}
+                  {formatMoneyCents(entry.totalDebitCents)}
                 </td>
               </tr>
             ))}

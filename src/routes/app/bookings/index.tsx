@@ -3,8 +3,13 @@ import { Link, createFileRoute } from "@tanstack/react-router"
 import { buttonVariants } from "@/components/ui/button-variants"
 import { cn } from "@/lib/utils"
 import { loadBookingsIndexFn } from "@/server/services/bookings/loaders"
-import { PERMISSION_KEYS, assertPermission } from "@/shared/permissions"
+import {
+  PERMISSION_KEYS,
+  assertPermission,
+  hasPermission,
+} from "@/shared/permissions"
 import { bookingListQuerySchema } from "@/shared/validation/dtos/commercial"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/bookings/")({
   staticData: {
@@ -20,21 +25,31 @@ export const Route = createFileRoute("/app/bookings/")({
   component: BookingsListPage,
 })
 
-function formatMoney(cents: number, currency: string) {
-  return `${currency} ${(cents / 100).toFixed(2)}`
-}
-
 function BookingsListPage() {
   const search = Route.useSearch()
+  const { permissions } = Route.useRouteContext()
   const { data } = Route.useLoaderData()
+
+  const canWrite = hasPermission(permissions, PERMISSION_KEYS["bookings.write"])
 
   return (
     <section className="space-y-8">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Bookings</h1>
-        <p className="text-sm text-muted-foreground">
-          Operational bookings converted from quotes with lifecycle tracking.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight">Bookings</h1>
+          <p className="text-sm text-muted-foreground">
+            Operational bookings from quotes or created directly, with lifecycle
+            tracking.
+          </p>
+        </div>
+        {canWrite ? (
+          <Link
+            to="/app/bookings/new"
+            className={cn(buttonVariants(), "h-10 px-4")}
+          >
+            New booking
+          </Link>
+        ) : null}
       </div>
 
       <form className="flex flex-wrap items-end gap-3" method="get">
@@ -88,7 +103,7 @@ function BookingsListPage() {
                   {booking.status.replace("_", " ")}
                 </td>
                 <td className="px-4 py-3">
-                  {formatMoney(booking.totalCents, booking.currency)}
+                  {formatMoneyCents(booking.totalCents, booking.currency)}
                 </td>
               </tr>
             ))}
@@ -96,7 +111,7 @@ function BookingsListPage() {
         </table>
         {data.bookings.items.length === 0 ? (
           <p className="px-4 py-6 text-sm text-muted-foreground">
-            No bookings yet. Convert an accepted quote to create one.
+            No bookings yet. Create one directly or convert an accepted quote.
           </p>
         ) : null}
       </div>

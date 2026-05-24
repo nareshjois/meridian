@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import { loadTrialBalanceFn } from "@/server/services/accounting/loaders"
 import { PERMISSION_KEYS, assertPermission } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/accounting/reports/trial-balance")({
   staticData: {
@@ -17,13 +18,6 @@ export const Route = createFileRoute("/app/accounting/reports/trial-balance")({
   loader: () => loadTrialBalanceFn({ data: {} }),
   component: TrialBalancePage,
 })
-
-function formatCents(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100)
-}
 
 function TrialBalancePage() {
   const { data } = Route.useLoaderData()
@@ -46,7 +40,7 @@ function TrialBalancePage() {
             : "border-amber-500/40 bg-amber-500/10",
         )}
       >
-        Net difference: {formatCents(data.netDifferenceCents)}
+        Net difference: {formatMoneyCents(data.netDifferenceCents)}
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border">
@@ -73,12 +67,12 @@ function TrialBalancePage() {
                   <td className="px-4 py-2">{account.name}</td>
                   <td className="px-4 py-2 text-right">
                     {account.debitBalanceCents > 0
-                      ? formatCents(account.debitBalanceCents)
+                      ? formatMoneyCents(account.debitBalanceCents)
                       : "—"}
                   </td>
                   <td className="px-4 py-2 text-right">
                     {account.creditBalanceCents > 0
-                      ? formatCents(account.creditBalanceCents)
+                      ? formatMoneyCents(account.creditBalanceCents)
                       : "—"}
                   </td>
                 </tr>

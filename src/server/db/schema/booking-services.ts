@@ -18,6 +18,9 @@ export const bookingServices = sqliteTable(
     bookingFieldsSchemaJson: text("booking_fields_schema_json")
       .notNull()
       .default("[]"),
+    sameStartEndDefault: integer("same_start_end_default", { mode: "boolean" })
+      .notNull()
+      .default(false),
     ...timestampColumns,
   },
   (table) => [

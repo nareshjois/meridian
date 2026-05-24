@@ -1,12 +1,7 @@
-import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
-import type { FormEvent } from "react"
+import { Link, createFileRoute } from "@tanstack/react-router"
 
 import { buttonVariants } from "@/components/ui/button-variants"
-import { ServiceFieldInputs } from "@/features/commercial/ServiceFieldInputs"
 import { cn } from "@/lib/utils"
-import { parseServiceFieldsJson } from "@/shared/commercial/service-fields"
-import { createQuoteFn } from "@/server/services/quotes/actions"
 import { loadQuotesIndexFn } from "@/server/services/quotes/loaders"
 import {
   PERMISSION_KEYS,
@@ -14,6 +9,7 @@ import {
   hasPermission,
 } from "@/shared/permissions"
 import { quoteListQuerySchema } from "@/shared/validation/dtos/commercial"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/quotes/")({
   staticData: {
@@ -29,89 +25,31 @@ export const Route = createFileRoute("/app/quotes/")({
   component: QuotesListPage,
 })
 
-function formatMoney(cents: number, currency: string) {
-  return `${currency} ${(cents / 100).toFixed(2)}`
-}
-
 function QuotesListPage() {
-  const router = useRouter()
   const search = Route.useSearch()
   const { permissions } = Route.useRouteContext()
   const { data } = Route.useLoaderData()
-  const [customerId, setCustomerId] = useState(data.customers[0]?.id ?? "")
-  const [serviceId, setServiceId] = useState(
-    data.bookingServices[0]?.id ?? "",
-  )
-  const [description, setDescription] = useState("")
-  const [unitPrice, setUnitPrice] = useState("100.00")
-  const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
-  const [message, setMessage] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const selectedService = data.bookingServices.find(
-    (service) => service.id === serviceId,
-  )
-  const quoteFields = useMemo(
-    () => parseServiceFieldsJson(selectedService?.quoteFieldsSchemaJson),
-    [selectedService],
-  )
-
-  useEffect(() => {
-    setFieldValues({})
-  }, [serviceId])
 
   const canWrite = hasPermission(permissions, PERMISSION_KEYS["quotes.write"])
 
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!canWrite || !customerId || !serviceId) {
-      return
-    }
-
-    setIsSubmitting(true)
-    setMessage("")
-
-    try {
-      const unitPriceCents = Math.round(parseFloat(unitPrice) * 100)
-      const result = await createQuoteFn({
-        data: {
-          customerId,
-          items: [
-            {
-              bookingServiceId: serviceId,
-              description: description || "Line item",
-              quantity: 1,
-              unitPriceCents,
-              fields: fieldValues,
-            },
-          ],
-        },
-      })
-
-      if (!result.ok) {
-        setMessage(result.error.message)
-        return
-      }
-
-      setDescription("")
-      setMessage("Quote created.")
-      await router.navigate({
-        to: "/app/quotes/$quoteId",
-        params: { quoteId: result.data.quoteId },
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
   return (
     <section className="space-y-8">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Quotes</h1>
-        <p className="text-sm text-muted-foreground">
-          Create quotes with service-typed line items and convert accepted quotes
-          to bookings.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight">Quotes</h1>
+          <p className="text-sm text-muted-foreground">
+            Create quotes with service-typed line items and convert accepted
+            quotes to bookings.
+          </p>
+        </div>
+        {canWrite ? (
+          <Link
+            to="/app/quotes/new"
+            className={cn(buttonVariants(), "h-10 px-4")}
+          >
+            New quote
+          </Link>
+        ) : null}
       </div>
 
       <form className="flex flex-wrap items-end gap-3" method="get">
@@ -138,81 +76,6 @@ function QuotesListPage() {
         </button>
       </form>
 
-      {canWrite && data.customers.length > 0 ? (
-        <form
-          onSubmit={handleCreate}
-          className="space-y-3 rounded-lg border border-border p-4"
-        >
-          <h2 className="font-medium">New quote</h2>
-          <div className="flex flex-wrap gap-3">
-            <select
-              required
-              value={customerId}
-              onChange={(event) => setCustomerId(event.target.value)}
-              className="h-10 rounded-md border border-border bg-background px-3"
-            >
-              {data.customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.displayName}
-                </option>
-              ))}
-            </select>
-            <select
-              required
-              value={serviceId}
-              onChange={(event) => setServiceId(event.target.value)}
-              className="h-10 rounded-md border border-border bg-background px-3"
-            >
-              {data.bookingServices.map((service) => (
-                <option key={service.id} value={service.id}>
-                  {service.name}
-                </option>
-              ))}
-            </select>
-            <input
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="Description"
-              className="h-10 flex-1 rounded-md border border-border bg-background px-3"
-            />
-            <input
-              required
-              type="number"
-              min="0"
-              step="0.01"
-              value={unitPrice}
-              onChange={(event) => setUnitPrice(event.target.value)}
-              className="h-10 w-28 rounded-md border border-border bg-background px-3"
-            />
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={cn(buttonVariants(), "h-10")}
-            >
-              {isSubmitting ? "Creating..." : "Create quote"}
-            </button>
-          </div>
-          {quoteFields.length > 0 ? (
-            <ServiceFieldInputs
-              fields={quoteFields}
-              values={fieldValues}
-              onChange={setFieldValues}
-              idPrefix="new-quote-fields"
-            />
-          ) : null}
-        </form>
-      ) : canWrite ? (
-        <p className="text-sm text-amber-700">
-          Add a customer in CRM before creating quotes.
-        </p>
-      ) : null}
-
-      {message ? (
-        <p className="text-sm text-muted-foreground" aria-live="polite">
-          {message}
-        </p>
-      ) : null}
-
       <div className="overflow-hidden rounded-lg border border-border">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-left">
@@ -238,7 +101,7 @@ function QuotesListPage() {
                 <td className="px-4 py-3">{quote.customerDisplayName}</td>
                 <td className="px-4 py-3 capitalize">{quote.status}</td>
                 <td className="px-4 py-3">
-                  {formatMoney(quote.totalCents, quote.currency)}
+                  {formatMoneyCents(quote.totalCents, quote.currency)}
                 </td>
               </tr>
             ))}

@@ -52,7 +52,7 @@ export const vendorBills = sqliteTable(
     })
       .notNull()
       .default("draft"),
-    currency: text("currency").notNull().default("USD"),
+    currency: text("currency").notNull().default("INR"),
     dueDate: integer("due_date", { mode: "timestamp_ms" }),
     totalCents: integer("total_cents").notNull().default(0),
     ...timestampColumns,

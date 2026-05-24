@@ -6,6 +6,7 @@ import type { ServiceError } from "@/server/services/_types"
 import type { RouteActionResult, RouteServiceError } from "@/shared/routes/contracts"
 import {
   assignBookingTravelerInputSchema,
+  bookingCreateInputSchema,
   bookingItemFieldsUpdateSchema,
   bookingStatusTransitionSchema,
   removeBookingTravelerInputSchema,
@@ -16,6 +17,18 @@ import { requireCommercialContext } from "../commercial/auth-context"
 function toActionError(error: ServiceError): RouteServiceError {
   return { code: error.code, message: error.message }
 }
+
+export const createBookingFn = createServerFn({ method: "POST" })
+  .inputValidator((payload: unknown) =>
+    bookingCreateInputSchema.parse(payload),
+  )
+  .handler(async ({ data }): Promise<RouteActionResult<{ bookingId: string }>> => {
+    const { ctx, services } = await requireCommercialContext()
+    const result = await services.bookings.createBooking(ctx, data)
+    return result.ok
+      ? { ok: true, data: { bookingId: result.data.id } }
+      : { ok: false, error: toActionError(result.error) }
+  })
 
 export const transitionBookingStatusFn = createServerFn({ method: "POST" })
   .inputValidator((payload: unknown) =>

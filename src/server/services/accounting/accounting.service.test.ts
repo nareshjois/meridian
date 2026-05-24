@@ -174,7 +174,7 @@ describe("accounting service", () => {
       bookingId,
       customerId,
       bookingNumber: "BK-FIXTURE-001",
-      currency: "USD",
+      currency: "INR",
       totalReceivableCents: FIXTURE_BOOKING_RECEIVABLE_CENTS,
     }
 
@@ -212,7 +212,7 @@ describe("accounting service", () => {
     const bill = await vendors.createBill(ctx, {
       vendorId: vendor.data.id,
       billNumber: "INV-INT-001",
-      currency: "USD",
+      currency: "INR",
       items: [
         {
           description: "Fixture bill",
@@ -246,7 +246,7 @@ describe("accounting service", () => {
       bookingId: crypto.randomUUID(),
       customerId: crypto.randomUUID(),
       bookingNumber: "BK-COMBO",
-      currency: "USD",
+      currency: "INR",
       totalReceivableCents: FIXTURE_BOOKING_RECEIVABLE_CENTS,
     })
 

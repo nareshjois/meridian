@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ServiceFieldSchemaEditor } from "@/features/commercial/ServiceFieldSchemaEditor"
 import type { BookingServiceFieldDefinition } from "@/shared/commercial/service-fields"
-import { updateBookingServiceFieldsFn } from "@/server/services/booking-services/actions"
+import { updateBookingServiceFieldsFn, updateBookingServiceScheduleFn } from "@/server/services/booking-services/actions"
 import { loadBookingServiceDetailFn } from "@/server/services/booking-services/loaders"
 import {
   PERMISSION_KEYS,
@@ -38,6 +38,9 @@ function BookingServiceDetailPage() {
   const [bookingFields, setBookingFields] = useState<
     BookingServiceFieldDefinition[]
   >(data.bookingFields)
+  const [sameStartEndDefault, setSameStartEndDefault] = useState(
+    data.service.sameStartEndDefault,
+  )
   const [message, setMessage] = useState("")
   const [isSaving, setIsSaving] = useState(false)
 
@@ -71,6 +74,31 @@ function BookingServiceDetailPage() {
     }
   }
 
+  async function handleSaveSchedule() {
+    if (!canWrite) {
+      return
+    }
+
+    setIsSaving(true)
+    setMessage("")
+
+    try {
+      const result = await updateBookingServiceScheduleFn({
+        data: { serviceId, sameStartEndDefault },
+      })
+
+      if (!result.ok) {
+        setMessage(result.error.message)
+        return
+      }
+
+      setMessage("Schedule settings saved.")
+      await router.invalidate()
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <section className="mx-auto max-w-4xl space-y-6">
       <div>
@@ -90,16 +118,42 @@ function BookingServiceDetailPage() {
 
       {canWrite ? (
         <>
+          <div className="space-y-3 rounded-lg border border-border p-4">
+            <h3 className="font-medium">Schedule</h3>
+            <p className="text-sm text-muted-foreground">
+              Every quote and booking line for this service collects start and end
+              date/time. Use this when both are typically the same (e.g. visa,
+              insurance).
+            </p>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={sameStartEndDefault}
+                onChange={(event) => setSameStartEndDefault(event.target.checked)}
+              />
+              Default end date/time to match start
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isSaving}
+              onClick={() => void handleSaveSchedule()}
+            >
+              Save schedule setting
+            </Button>
+          </div>
+
           <ServiceFieldSchemaEditor
-            title="Quote fields"
-            description="Collected when creating quote line items for this service."
+            title="Additional quote fields"
+            description="Start and end date/time are always collected. Add extra fields here (do not use start_datetime or end_datetime as keys)."
             fields={quoteFields}
             onChange={setQuoteFields}
             idPrefix="quote-fields"
           />
           <ServiceFieldSchemaEditor
-            title="Booking fields"
-            description="Shown on bookings. Values from quote fields copy over on conversion; use the same keys to keep data aligned."
+            title="Additional booking fields"
+            description="Shown on bookings after conversion. Use the same keys as quote extras when values should carry over."
             fields={bookingFields}
             onChange={setBookingFields}
             idPrefix="booking-fields"

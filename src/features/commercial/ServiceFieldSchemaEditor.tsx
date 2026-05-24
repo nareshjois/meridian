@@ -124,6 +124,7 @@ export function ServiceFieldSchemaEditor({
             <option value="text">Text</option>
             <option value="number">Number</option>
             <option value="date">Date</option>
+            <option value="datetime">Date & time</option>
             <option value="textarea">Text area</option>
           </select>
         </div>

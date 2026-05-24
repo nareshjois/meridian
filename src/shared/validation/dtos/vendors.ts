@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import {
   createListQuerySchema,
-  currencyCodeSchema,
+  defaultCurrencyCodeSchema,
   idSchema,
   moneyCentsSchema,
   nonEmptyStringSchema,
@@ -36,7 +36,7 @@ export type VendorBillItemInput = z.infer<typeof vendorBillItemInputSchema>
 export const vendorBillCreateInputSchema = z.object({
   vendorId: idSchema,
   billNumber: nonEmptyStringSchema,
-  currency: currencyCodeSchema.default("USD"),
+  currency: defaultCurrencyCodeSchema,
   dueDate: z.coerce.date().optional(),
   items: z.array(vendorBillItemInputSchema).min(1),
   /** When set with resolvable expense accounts, bill is posted (open) for payables. */

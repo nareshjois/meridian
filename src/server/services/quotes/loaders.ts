@@ -18,38 +18,64 @@ export const loadQuotesIndexFn = createServerFn({ method: "POST" })
     const { ctx, services } = await requireCommercialContext()
     assertPermission(ctx.permissions, PERMISSION_KEYS["quotes.read"])
 
-    const [quotesResult, customersResult, servicesResult] = await Promise.all([
-      services.quotes.listQuotes(ctx, query),
+    const quotesResult = await services.quotes.listQuotes(ctx, query)
+
+    if (!quotesResult.ok) {
+      throw new Error(quotesResult.error.message)
+    }
+
+    return {
+      data: {
+        quotes: quotesResult.data,
+      },
+    } satisfies AppLoaderResult<{
+      quotes: (typeof quotesResult)["data"]
+    }>
+  })
+
+export const loadQuoteCreateFn = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { ctx, services } = await requireCommercialContext()
+    assertPermission(ctx.permissions, PERMISSION_KEYS["quotes.read"])
+
+    const [customersResult, servicesResult, vendorsResult] = await Promise.all([
       services.customers.listCustomers(ctx, {
         page: 1,
         pageSize: 100,
         sortDirection: "asc",
       }),
       services.bookingServices.listServices(ctx, { includeInactive: false }),
+      services.vendors.listVendors(ctx, {
+        page: 1,
+        pageSize: 100,
+        sortDirection: "asc",
+        status: "active",
+      }),
     ])
 
-    if (!quotesResult.ok) {
-      throw new Error(quotesResult.error.message)
-    }
     if (!customersResult.ok) {
       throw new Error(customersResult.error.message)
     }
     if (!servicesResult.ok) {
       throw new Error(servicesResult.error.message)
     }
+    if (!vendorsResult.ok) {
+      throw new Error(vendorsResult.error.message)
+    }
 
     return {
       data: {
-        quotes: quotesResult.data,
         customers: customersResult.data.items,
         bookingServices: servicesResult.data.items,
+        vendors: vendorsResult.data.items,
       },
     } satisfies AppLoaderResult<{
-      quotes: (typeof quotesResult)["data"]
       customers: (typeof customersResult)["data"]["items"]
       bookingServices: (typeof servicesResult)["data"]["items"]
+      vendors: (typeof vendorsResult)["data"]["items"]
     }>
-  })
+  },
+)
 
 const loadQuoteDetailInputSchema = z.object({
   quoteId: idSchema,

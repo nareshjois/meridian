@@ -8,6 +8,8 @@ import type {
   BookingListQuery,
   BookingServiceCreateInput,
   BookingServiceUpdateFieldsInput,
+  BookingServiceScheduleConfigInput,
+  BookingCreateInput,
   BookingStatusTransitionInput,
   ConvertQuoteToBookingInput,
   QuoteCreateInput,
@@ -22,6 +24,7 @@ import type {
   BookingTraveler,
 } from "@/server/db/schema/bookings"
 import type { Quote, QuoteItem } from "@/server/db/schema/quotes"
+import type { CommercialAttachmentRow } from "@/server/services/commercial-attachments/repository"
 import type { AssignBookingTravelerInput, BookingItemFieldsUpdateInput } from "@/shared/validation/dtos/commercial"
 
 export type QuoteSummary = Quote & {
@@ -31,6 +34,8 @@ export type QuoteSummary = Quote & {
 
 export type QuoteDetail = Quote & {
   items: QuoteItem[]
+  documents: CommercialAttachmentRow[]
+  vendorQuotes: CommercialAttachmentRow[]
   totalCents: number
   customerDisplayName: string
 }
@@ -42,6 +47,8 @@ export type BookingSummary = Booking & {
 
 export type BookingDetail = Booking & {
   items: BookingItem[]
+  documents: CommercialAttachmentRow[]
+  vendorQuotes: CommercialAttachmentRow[]
   statusHistory: BookingStatusHistory[]
   travelers: BookingTraveler[]
   totalCents: number
@@ -68,6 +75,10 @@ export interface BookingServiceCatalogContract {
   updateServiceFields(
     ctx: ServiceContext,
     input: BookingServiceUpdateFieldsInput,
+  ): Promise<MutationResult<BookingService>>
+  updateServiceScheduleConfig(
+    ctx: ServiceContext,
+    input: BookingServiceScheduleConfigInput,
   ): Promise<MutationResult<BookingService>>
 }
 
@@ -99,6 +110,10 @@ export interface BookingServiceContract {
     ctx: ServiceContext,
     query: BookingListQuery,
   ): Promise<ListResult<BookingSummary>>
+  createBooking(
+    ctx: ServiceContext,
+    input: BookingCreateInput,
+  ): Promise<MutationResult<BookingDetail>>
   getBookingById(
     ctx: ServiceContext,
     bookingId: string,

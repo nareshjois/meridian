@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { loadArSummaryFn } from "@/server/services/accounting/loaders"
 import { PERMISSION_KEYS, assertPermission } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/accounting/reports/ar")({
   staticData: {
@@ -17,13 +18,6 @@ export const Route = createFileRoute("/app/accounting/reports/ar")({
   component: ArSummaryPage,
 })
 
-function formatCents(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100)
-}
-
 function ArSummaryPage() {
   const { data } = Route.useLoaderData()
 
@@ -35,7 +29,7 @@ function ArSummaryPage() {
         </h1>
         <p className="text-sm text-muted-foreground">
           Open receivables by booking source. Total:{" "}
-          {formatCents(data.totalReceivableCents)}
+          {formatMoneyCents(data.totalReceivableCents)}
         </p>
       </div>
 
@@ -75,7 +69,7 @@ function ArSummaryPage() {
                       {item.customerName ?? "—"}
                     </td>
                     <td className="px-4 py-2 text-right">
-                      {formatCents(item.balanceCents)}
+                      {formatMoneyCents(item.balanceCents)}
                     </td>
                   </tr>
                 )

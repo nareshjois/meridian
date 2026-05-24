@@ -10,6 +10,7 @@ import {
   assertPermission,
   hasPermission,
 } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/accounting/journal/$entryId")({
   staticData: {
@@ -25,13 +26,6 @@ export const Route = createFileRoute("/app/accounting/journal/$entryId")({
     loadJournalDetailFn({ data: { entryId: params.entryId } }),
   component: JournalDetailPage,
 })
-
-function formatCents(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100)
-}
 
 function JournalDetailPage() {
   const router = useRouter()
@@ -109,10 +103,10 @@ function JournalDetailPage() {
               <tr key={line.id} className="border-b border-border/60">
                 <td className="px-4 py-2 font-mono text-xs">{line.accountId}</td>
                 <td className="px-4 py-2 text-right">
-                  {line.debitCents > 0 ? formatCents(line.debitCents) : "—"}
+                  {line.debitCents > 0 ? formatMoneyCents(line.debitCents) : "—"}
                 </td>
                 <td className="px-4 py-2 text-right">
-                  {line.creditCents > 0 ? formatCents(line.creditCents) : "—"}
+                  {line.creditCents > 0 ? formatMoneyCents(line.creditCents) : "—"}
                 </td>
               </tr>
             ))}

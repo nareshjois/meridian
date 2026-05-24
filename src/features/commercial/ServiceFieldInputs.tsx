@@ -51,7 +51,15 @@ export function ServiceFieldInputs({
           ) : (
             <Input
               id={`${idPrefix}-${field.key}`}
-              type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
+              type={
+                field.type === "number"
+                  ? "number"
+                  : field.type === "date"
+                    ? "date"
+                    : field.type === "datetime"
+                      ? "datetime-local"
+                      : "text"
+              }
               value={values[field.key] ?? ""}
               onChange={(event) => updateField(field.key, event.target.value)}
               className={fieldClassName}

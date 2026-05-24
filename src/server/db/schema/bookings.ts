@@ -28,7 +28,7 @@ export const bookings = sqliteTable(
     })
       .notNull()
       .default("draft"),
-    currency: text("currency").notNull().default("USD"),
+    currency: text("currency").notNull().default("INR"),
     ...timestampColumns,
   },
   (table) => [

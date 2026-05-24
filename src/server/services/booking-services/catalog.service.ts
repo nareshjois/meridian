@@ -6,6 +6,7 @@ import {
   type ServiceResult,
 } from "@/server/services/_types"
 import { hasPermission, PERMISSION_KEYS } from "@/shared/permissions"
+import { validateCustomFieldDefinitions } from "@/shared/commercial/service-fields"
 
 import { createBookingServiceRepository } from "./repository"
 
@@ -124,6 +125,10 @@ export function createBookingServiceCatalog(
 
       const quoteKeys = new Set<string>()
       for (const field of input.quoteFields) {
+        const reserved = validateCustomFieldDefinitions([field])
+        if (reserved) {
+          return serviceErr({ code: "VALIDATION_ERROR", message: reserved })
+        }
         if (quoteKeys.has(field.key)) {
           return serviceErr({
             code: "VALIDATION_ERROR",
@@ -135,6 +140,10 @@ export function createBookingServiceCatalog(
 
       const bookingKeys = new Set<string>()
       for (const field of input.bookingFields) {
+        const reserved = validateCustomFieldDefinitions([field])
+        if (reserved) {
+          return serviceErr({ code: "VALIDATION_ERROR", message: reserved })
+        }
         if (bookingKeys.has(field.key)) {
           return serviceErr({
             code: "VALIDATION_ERROR",
@@ -148,6 +157,36 @@ export function createBookingServiceCatalog(
         quoteFields: input.quoteFields,
         bookingFields: input.bookingFields,
       })
+      if (!updated) {
+        return serviceErr({
+          code: "NOT_FOUND",
+          message: "Booking service not found.",
+        })
+      }
+
+      return serviceOk(updated)
+    },
+
+    async updateServiceScheduleConfig(ctx, input) {
+      if (
+        !hasPermission(ctx.permissions, PERMISSION_KEYS["booking_services.write"])
+      ) {
+        return forbidden("Missing permission to update booking services.")
+      }
+
+      const service = await repo.findById(ctx.agencyId, input.serviceId)
+      if (!service) {
+        return serviceErr({
+          code: "NOT_FOUND",
+          message: "Booking service not found.",
+        })
+      }
+
+      const updated = await repo.updateSameStartEndDefault(
+        ctx.agencyId,
+        input.serviceId,
+        input.sameStartEndDefault,
+      )
       if (!updated) {
         return serviceErr({
           code: "NOT_FOUND",

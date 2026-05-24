@@ -15,6 +15,7 @@ import {
   assertPermission,
   hasPermission,
 } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/vendors/$vendorId")({
   staticData: {
@@ -28,13 +29,6 @@ export const Route = createFileRoute("/app/vendors/$vendorId")({
   },
   component: VendorDetailPage,
 })
-
-function formatMoney(cents: number, currency = "USD") {
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency,
-  }).format(cents / 100)
-}
 
 function VendorDetailPage() {
   const router = useRouter()
@@ -223,7 +217,7 @@ function VendorDetailPage() {
               step="0.01"
               value={lineUnitCost}
               onChange={(event) => setLineUnitCost(event.target.value)}
-              placeholder="Amount (USD)"
+              placeholder="Amount (₹)"
               className="h-10 rounded-md border border-border bg-background px-3"
             />
           </div>
@@ -254,7 +248,7 @@ function VendorDetailPage() {
               {openBills.map((bill) => (
                 <option key={bill.id} value={bill.id}>
                   {bill.billNumber} ({bill.status}) —{" "}
-                  {formatMoney(bill.totalCents, bill.currency)}
+                  {formatMoneyCents(bill.totalCents, bill.currency)}
                 </option>
               ))}
             </select>
@@ -265,7 +259,7 @@ function VendorDetailPage() {
               step="0.01"
               value={paymentAmount}
               onChange={(event) => setPaymentAmount(event.target.value)}
-              placeholder="Amount (USD)"
+              placeholder="Amount (₹)"
               className="h-10 rounded-md border border-border bg-background px-3"
             />
             <input
@@ -313,7 +307,7 @@ function VendorDetailPage() {
                 </td>
                 <td className="px-4 py-3 capitalize">{bill.status}</td>
                 <td className="px-4 py-3">
-                  {formatMoney(bill.totalCents, bill.currency)}
+                  {formatMoneyCents(bill.totalCents, bill.currency)}
                 </td>
               </tr>
             ))}

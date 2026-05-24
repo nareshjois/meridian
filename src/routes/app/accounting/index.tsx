@@ -4,6 +4,7 @@ import { buttonVariants } from "@/components/ui/button-variants"
 import { cn } from "@/lib/utils"
 import { loadAccountingHubFn } from "@/server/services/accounting/loaders"
 import { PERMISSION_KEYS, assertPermission } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/accounting/")({
   staticData: {
@@ -18,13 +19,6 @@ export const Route = createFileRoute("/app/accounting/")({
   loader: () => loadAccountingHubFn(),
   component: AccountingHubPage,
 })
-
-function formatCents(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100)
-}
 
 function AccountingHubPage() {
   const { data } = Route.useLoaderData()
@@ -47,7 +41,7 @@ function AccountingHubPage() {
             : "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100",
         )}
       >
-        Trial balance net difference: {formatCents(data.netDifferenceCents)}
+        Trial balance net difference: {formatMoneyCents(data.netDifferenceCents)}
         {balanced ? " — books are balanced." : " — review journal entries."}
       </div>
 
@@ -120,7 +114,7 @@ function AccountingHubPage() {
                     {row.entryNumber}
                   </Link>
                   <span className="text-muted-foreground">
-                    {formatCents(row.totalDebitCents)}
+                    {formatMoneyCents(row.totalDebitCents)}
                   </span>
                 </li>
               )

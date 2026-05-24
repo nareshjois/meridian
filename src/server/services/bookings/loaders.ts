@@ -25,6 +25,50 @@ export const loadBookingsIndexFn = createServerFn({ method: "POST" })
     } satisfies AppLoaderResult<{ bookings: (typeof result)["data"] }>
   })
 
+export const loadBookingCreateFn = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { ctx, services } = await requireCommercialContext()
+    assertPermission(ctx.permissions, PERMISSION_KEYS["bookings.read"])
+
+    const [customersResult, servicesResult, vendorsResult] = await Promise.all([
+      services.customers.listCustomers(ctx, {
+        page: 1,
+        pageSize: 100,
+        sortDirection: "asc",
+      }),
+      services.bookingServices.listServices(ctx, { includeInactive: false }),
+      services.vendors.listVendors(ctx, {
+        page: 1,
+        pageSize: 100,
+        sortDirection: "asc",
+        status: "active",
+      }),
+    ])
+
+    if (!customersResult.ok) {
+      throw new Error(customersResult.error.message)
+    }
+    if (!servicesResult.ok) {
+      throw new Error(servicesResult.error.message)
+    }
+    if (!vendorsResult.ok) {
+      throw new Error(vendorsResult.error.message)
+    }
+
+    return {
+      data: {
+        customers: customersResult.data.items,
+        bookingServices: servicesResult.data.items,
+        vendors: vendorsResult.data.items,
+      },
+    } satisfies AppLoaderResult<{
+      customers: (typeof customersResult)["data"]["items"]
+      bookingServices: (typeof servicesResult)["data"]["items"]
+      vendors: (typeof vendorsResult)["data"]["items"]
+    }>
+  },
+)
+
 const loadBookingDetailInputSchema = z.object({
   bookingId: idSchema,
 })

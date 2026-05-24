@@ -3,7 +3,7 @@ import { z } from "zod"
 import { bookingServiceFieldDefinitionSchema } from "@/shared/commercial/service-fields"
 import {
   createListQuerySchema,
-  currencyCodeSchema,
+  defaultCurrencyCodeSchema,
   idSchema,
   moneyCentsSchema,
   nonEmptyStringSchema,
@@ -24,6 +24,7 @@ export const bookingServiceCreateInputSchema = z.object({
   defaultRevenueAccountId: idSchema.optional(),
   quoteFields: z.array(bookingServiceFieldDefinitionSchema).optional(),
   bookingFields: z.array(bookingServiceFieldDefinitionSchema).optional(),
+  sameStartEndDefault: z.boolean().optional(),
 })
 export type BookingServiceCreateInput = z.infer<
   typeof bookingServiceCreateInputSchema
@@ -38,7 +39,40 @@ export type BookingServiceUpdateFieldsInput = z.infer<
   typeof bookingServiceUpdateFieldsInputSchema
 >
 
+export const bookingServiceScheduleConfigSchema = z.object({
+  serviceId: idSchema,
+  sameStartEndDefault: z.boolean(),
+})
+export type BookingServiceScheduleConfigInput = z.infer<
+  typeof bookingServiceScheduleConfigSchema
+>
+
 const serviceFieldValuesSchema = z.record(z.string(), z.string())
+
+export const commercialDocumentInputSchema = z.object({
+  label: nonEmptyStringSchema,
+  fileName: nonEmptyStringSchema,
+  storageKey: z.string().trim().optional(),
+  mimeType: z.string().trim().optional(),
+  notes: z.string().trim().optional(),
+})
+export type CommercialDocumentInput = z.infer<
+  typeof commercialDocumentInputSchema
+>
+
+export const vendorQuoteAttachmentInputSchema = z.object({
+  vendorId: idSchema,
+  label: nonEmptyStringSchema,
+  vendorReference: z.string().trim().optional(),
+  amountCents: moneyCentsSchema.optional(),
+  currency: defaultCurrencyCodeSchema.optional(),
+  fileName: z.string().trim().optional(),
+  storageKey: z.string().trim().optional(),
+  notes: z.string().trim().optional(),
+})
+export type VendorQuoteAttachmentInput = z.infer<
+  typeof vendorQuoteAttachmentInputSchema
+>
 
 export const quoteItemInputSchema = z.object({
   bookingServiceId: idSchema,
@@ -58,12 +92,27 @@ export type BookingItemFieldsUpdateInput = z.infer<
   typeof bookingItemFieldsUpdateSchema
 >
 
+export const bookingItemInputSchema = quoteItemInputSchema
+export type BookingItemInput = z.infer<typeof bookingItemInputSchema>
+
+export const bookingCreateInputSchema = z.object({
+  customerId: idSchema,
+  currency: defaultCurrencyCodeSchema,
+  groupId: idSchema.optional(),
+  items: z.array(bookingItemInputSchema).min(1),
+  documents: z.array(commercialDocumentInputSchema).optional(),
+  vendorQuotes: z.array(vendorQuoteAttachmentInputSchema).optional(),
+})
+export type BookingCreateInput = z.infer<typeof bookingCreateInputSchema>
+
 export const quoteCreateInputSchema = z.object({
   customerId: idSchema,
-  currency: currencyCodeSchema.default("USD"),
+  currency: defaultCurrencyCodeSchema,
   validUntil: z.coerce.date().optional(),
   notes: z.string().optional(),
   items: z.array(quoteItemInputSchema).min(1),
+  documents: z.array(commercialDocumentInputSchema).optional(),
+  vendorQuotes: z.array(vendorQuoteAttachmentInputSchema).optional(),
 })
 export type QuoteCreateInput = z.infer<typeof quoteCreateInputSchema>
 

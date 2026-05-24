@@ -71,7 +71,7 @@ describe("vendor service", () => {
     const bill = await vendors.createBill(ctx, {
       vendorId: vendor.data.id,
       billNumber: "INV-1001",
-      currency: "USD",
+      currency: "INR",
       items: [
         {
           description: "Group block deposit",
@@ -130,7 +130,7 @@ describe("vendor service", () => {
     const bill = await vendors.createBill(ctx, {
       vendorId: vendor.data.id,
       billNumber: "INV-2002",
-      currency: "USD",
+      currency: "INR",
       items: [{ description: "Service fee", quantity: 1, unitCostCents: 10_000 }],
       payableAccountId: PAYABLE_ACCOUNT_ID,
     })

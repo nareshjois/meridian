@@ -3,6 +3,8 @@ import { and, asc, count, eq } from "drizzle-orm"
 import type { MeridianDb } from "@/server/db/client"
 import { bookingServices } from "@/server/db/schema/booking-services"
 import {
+  getCustomFieldsOnly,
+  getEffectiveServiceFields,
   parseServiceFieldsJson,
   serializeServiceFields,
 } from "@/shared/commercial/service-fields"
@@ -72,6 +74,7 @@ export function createBookingServiceRepository(db: MeridianDb) {
         bookingFieldsSchemaJson: serializeServiceFields(
           input.bookingFields ?? [],
         ),
+        sameStartEndDefault: input.sameStartEndDefault ?? false,
         createdAt: now,
         updatedAt: now,
       })
@@ -99,14 +102,35 @@ export function createBookingServiceRepository(db: MeridianDb) {
       serviceId: string,
       input: BookingServiceFieldsInput,
     ) {
+      const quoteCustom = getCustomFieldsOnly(input.quoteFields)
+      const bookingCustom = getCustomFieldsOnly(input.bookingFields)
       const now = new Date()
       await db
         .update(bookingServices)
         .set({
-          quoteFieldsSchemaJson: serializeServiceFields(input.quoteFields),
-          bookingFieldsSchemaJson: serializeServiceFields(input.bookingFields),
+          quoteFieldsSchemaJson: serializeServiceFields(quoteCustom),
+          bookingFieldsSchemaJson: serializeServiceFields(bookingCustom),
           updatedAt: now,
         })
+        .where(
+          and(
+            eq(bookingServices.agencyId, agencyId),
+            eq(bookingServices.id, serviceId),
+          ),
+        )
+
+      return this.findById(agencyId, serviceId)
+    },
+
+    async updateSameStartEndDefault(
+      agencyId: string,
+      serviceId: string,
+      sameStartEndDefault: boolean,
+    ) {
+      const now = new Date()
+      await db
+        .update(bookingServices)
+        .set({ sameStartEndDefault, updatedAt: now })
         .where(
           and(
             eq(bookingServices.agencyId, agencyId),
@@ -123,9 +147,17 @@ export function createBookingServiceRepository(db: MeridianDb) {
         return null
       }
 
+      const quoteCustom = parseServiceFieldsJson(service.quoteFieldsSchemaJson)
+      const bookingCustom = parseServiceFieldsJson(
+        service.bookingFieldsSchemaJson,
+      )
+
       return {
-        quoteFields: parseServiceFieldsJson(service.quoteFieldsSchemaJson),
-        bookingFields: parseServiceFieldsJson(service.bookingFieldsSchemaJson),
+        quoteFields: getEffectiveServiceFields(quoteCustom),
+        bookingFields: getEffectiveServiceFields(bookingCustom),
+        customQuoteFields: quoteCustom,
+        customBookingFields: bookingCustom,
+        sameStartEndDefault: service.sameStartEndDefault,
       }
     },
 
@@ -136,6 +168,13 @@ export function createBookingServiceRepository(db: MeridianDb) {
       for (const service of services) {
         const existing = await this.findByCode(agencyId, service.code)
         if (existing) {
+          if (service.sameStartEndDefault != null) {
+            await this.updateSameStartEndDefault(
+              agencyId,
+              existing.id,
+              service.sameStartEndDefault,
+            )
+          }
           continue
         }
         await this.createService(agencyId, service)

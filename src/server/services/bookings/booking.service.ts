@@ -8,6 +8,7 @@ import {
 import { createCustomerRepository } from "@/server/services/customers/repository"
 import { hasPermission, PERMISSION_KEYS } from "@/shared/permissions"
 import type { BookingStatusTransitionInput } from "@/shared/validation/dtos/commercial"
+import type { BookingCreateInput } from "@/shared/validation/dtos/commercial"
 import {
   COMMERCIAL_EVENT_TYPES,
   type BookingConfirmedEvent,
@@ -62,6 +63,63 @@ export function createBookingService(
         return serviceErr({ code: "NOT_FOUND", message: "Booking not found." })
       }
 
+      return serviceOk(booking)
+    },
+
+    async createBooking(ctx, input: BookingCreateInput) {
+      if (!hasPermission(ctx.permissions, PERMISSION_KEYS["bookings.write"])) {
+        return forbidden("Missing permission to create bookings.")
+      }
+
+      const customer = await customers.findCustomerById(
+        ctx.agencyId,
+        input.customerId,
+      )
+      if (!customer) {
+        return serviceErr({
+          code: "NOT_FOUND",
+          message: "Customer not found.",
+        })
+      }
+
+      const serviceError = await repo.validateBookingServices(
+        ctx.agencyId,
+        input.items.map((item) => item.bookingServiceId),
+      )
+      if (serviceError) {
+        return serviceErr({
+          code: "VALIDATION_ERROR",
+          message: serviceError,
+        })
+      }
+
+      const fieldError = await repo.validateBookingItemFields(
+        ctx.agencyId,
+        input.items,
+      )
+      if (fieldError) {
+        return serviceErr({
+          code: "VALIDATION_ERROR",
+          message: fieldError,
+        })
+      }
+
+      const vendorError = await repo.validateVendorQuoteAttachments(
+        ctx.agencyId,
+        input.vendorQuotes,
+      )
+      if (vendorError) {
+        return serviceErr({
+          code: "VALIDATION_ERROR",
+          message: vendorError,
+        })
+      }
+
+      const booking = await repo.createBooking(
+        ctx.agencyId,
+        ctx.actorUserId,
+        input,
+      )
       return serviceOk(booking)
     },
 

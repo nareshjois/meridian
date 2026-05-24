@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import { loadLedgerFn } from "@/server/services/accounting/loaders"
 import { CHART_ACCOUNT_IDS } from "@/server/services/accounting/seed"
 import { PERMISSION_KEYS, assertPermission } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/accounting/reports/ledger")({
   staticData: {
@@ -33,13 +34,6 @@ export const Route = createFileRoute("/app/accounting/reports/ledger")({
     }),
   component: LedgerPage,
 })
-
-function formatCents(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100)
-}
 
 function LedgerPage() {
   const { data } = Route.useLoaderData()
@@ -111,13 +105,13 @@ function LedgerPage() {
                   {new Date(line.entryDate).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-2 text-right">
-                  {line.debitCents > 0 ? formatCents(line.debitCents) : "—"}
+                  {line.debitCents > 0 ? formatMoneyCents(line.debitCents) : "—"}
                 </td>
                 <td className="px-4 py-2 text-right">
-                  {line.creditCents > 0 ? formatCents(line.creditCents) : "—"}
+                  {line.creditCents > 0 ? formatMoneyCents(line.creditCents) : "—"}
                 </td>
                 <td className="px-4 py-2 text-right font-medium">
-                  {formatCents(line.runningBalanceCents)}
+                  {formatMoneyCents(line.runningBalanceCents)}
                 </td>
               </tr>
             ))}

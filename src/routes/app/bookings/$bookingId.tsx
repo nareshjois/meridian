@@ -4,6 +4,8 @@ import type { FormEvent } from "react"
 
 import { buttonVariants } from "@/components/ui/button-variants"
 import { BookingItemFieldsEditor } from "@/features/commercial/BookingItemFieldsEditor"
+import { InvoiceLineItemsTable } from "@/features/commercial/InvoiceLineItemsTable"
+import { CommercialAttachmentsPanel } from "@/features/commercial/CommercialAttachmentsPanel"
 import { cn } from "@/lib/utils"
 import {
   assignBookingTravelerFn,
@@ -17,6 +19,7 @@ import {
   hasPermission,
 } from "@/shared/permissions"
 import type { BookingStatusTransitionInput } from "@/shared/validation/dtos/commercial"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/bookings/$bookingId")({
   staticData: {
@@ -29,10 +32,6 @@ export const Route = createFileRoute("/app/bookings/$bookingId")({
     loadBookingDetailFn({ data: { bookingId: params.bookingId } }),
   component: BookingDetailPage,
 })
-
-function formatMoney(cents: number, currency: string) {
-  return `${currency} ${(cents / 100).toFixed(2)}`
-}
 
 function BookingDetailPage() {
   const router = useRouter()
@@ -118,7 +117,7 @@ function BookingDetailPage() {
           <span className="capitalize">
             {booking.status.replace("_", " ")}
           </span>{" "}
-          · {formatMoney(booking.totalCents, booking.currency)}
+          · {formatMoneyCents(booking.totalCents, booking.currency)}
         </p>
       </div>
 
@@ -169,33 +168,30 @@ function BookingDetailPage() {
         </p>
       ) : null}
 
-      <div className="space-y-4">
-        {booking.items.map((item) => (
-          <div
-            key={item.id}
-            className="rounded-lg border border-border p-4 text-sm"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <p className="font-medium">{item.description}</p>
-              <p>
-                {item.quantity} ×{" "}
-                {formatMoney(item.unitPriceCents, booking.currency)} ={" "}
-                {formatMoney(
-                  item.quantity * item.unitPriceCents,
-                  booking.currency,
-                )}
-              </p>
-            </div>
+      <InvoiceLineItemsTable
+        phase="booking"
+        items={booking.items}
+        currency={booking.currency}
+        schemaMap={data.serviceSchemas}
+      />
+
+      {canWrite
+        ? booking.items.map((item) => (
             <BookingItemFieldsEditor
+              key={item.id}
               bookingId={bookingId}
               item={item}
               serviceSchema={data.serviceSchemas[item.bookingServiceId]}
               canWrite={canWrite}
               onSaved={() => router.invalidate()}
             />
-          </div>
-        ))}
-      </div>
+          ))
+        : null}
+
+      <CommercialAttachmentsPanel
+        documents={booking.documents}
+        vendorQuotes={booking.vendorQuotes}
+      />
 
       <div className="space-y-3">
         <h2 className="font-medium">Travelers</h2>

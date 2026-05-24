@@ -72,13 +72,17 @@ describe("commercial workflows", () => {
 
     const created = await services.quotes.createQuote(ctx, {
       customerId,
-      currency: "USD",
+      currency: "INR",
       items: [
         {
           bookingServiceId: flight!.id,
           description: "Round trip",
           quantity: 2,
           unitPriceCents: 50_000,
+          fields: {
+            start_datetime: "2026-07-01T09:00",
+            end_datetime: "2026-07-08T18:00",
+          },
         },
       ],
     })
@@ -121,7 +125,7 @@ describe("commercial workflows", () => {
       bookingId: converted.data.id,
       customerId,
       bookingNumber: converted.data.bookingNumber,
-      currency: "USD",
+      currency: "INR",
       totalReceivableCents: 100_000,
     })
     expect(event.eventType).toBe("commercial.booking.confirmed")
@@ -174,19 +178,13 @@ describe("commercial workflows", () => {
         serviceId: flight!.id,
         quoteFields: [
           {
-            key: "departure_date",
-            label: "Departure date",
-            type: "date",
-            required: true,
+            key: "pnr",
+            label: "PNR",
+            type: "text",
+            required: false,
           },
         ],
         bookingFields: [
-          {
-            key: "departure_date",
-            label: "Departure date",
-            type: "date",
-            required: true,
-          },
           {
             key: "pnr",
             label: "PNR",
@@ -200,7 +198,7 @@ describe("commercial workflows", () => {
 
     const missingFields = await services.quotes.createQuote(ctx, {
       customerId,
-      currency: "USD",
+      currency: "INR",
       items: [
         {
           bookingServiceId: flight!.id,
@@ -215,14 +213,17 @@ describe("commercial workflows", () => {
 
     const created = await services.quotes.createQuote(ctx, {
       customerId,
-      currency: "USD",
+      currency: "INR",
       items: [
         {
           bookingServiceId: flight!.id,
           description: "One way",
           quantity: 1,
           unitPriceCents: 25_000,
-          fields: { departure_date: "2026-06-01" },
+          fields: {
+            start_datetime: "2026-06-01T08:00",
+            end_datetime: "2026-06-01T20:00",
+          },
         },
       ],
     })
@@ -258,7 +259,7 @@ describe("commercial workflows", () => {
     }
 
     expect(booking.data.items).toHaveLength(1)
-    expect(booking.data.items[0]?.fieldsJson).toContain("departure_date")
+    expect(booking.data.items[0]?.fieldsJson).toContain("start_datetime")
     expect(booking.data.items[0]?.fieldsJson).toContain("2026-06-01")
     expect(booking.data.items[0]?.fieldsJson).toContain("pnr")
   })

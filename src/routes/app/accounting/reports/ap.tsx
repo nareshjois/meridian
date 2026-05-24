@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { loadApSummaryFn } from "@/server/services/accounting/loaders"
 import { PERMISSION_KEYS, assertPermission } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/accounting/reports/ap")({
   staticData: {
@@ -17,13 +18,6 @@ export const Route = createFileRoute("/app/accounting/reports/ap")({
   component: ApSummaryPage,
 })
 
-function formatCents(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100)
-}
-
 function ApSummaryPage() {
   const { data } = Route.useLoaderData()
 
@@ -35,7 +29,7 @@ function ApSummaryPage() {
         </h1>
         <p className="text-sm text-muted-foreground">
           Open payables by vendor bill. Total:{" "}
-          {formatCents(data.totalPayableCents)}
+          {formatMoneyCents(data.totalPayableCents)}
         </p>
       </div>
 
@@ -73,7 +67,7 @@ function ApSummaryPage() {
                     </td>
                     <td className="px-4 py-2">{item.vendorName ?? "—"}</td>
                     <td className="px-4 py-2 text-right">
-                      {formatCents(item.balanceCents)}
+                      {formatMoneyCents(item.balanceCents)}
                     </td>
                   </tr>
                 )

@@ -2,6 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router"
 
 import { loadVendorBillDetailFn } from "@/server/services/vendors/loaders"
 import { PERMISSION_KEYS, assertPermission } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/vendors/bills/$billId")({
   staticData: {
@@ -15,13 +16,6 @@ export const Route = createFileRoute("/app/vendors/bills/$billId")({
   },
   component: VendorBillDetailPage,
 })
-
-function formatMoney(cents: number, currency = "USD") {
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency,
-  }).format(cents / 100)
-}
 
 function VendorBillDetailPage() {
   const { data } = Route.useLoaderData()
@@ -42,9 +36,9 @@ function VendorBillDetailPage() {
           Bill {bill.billNumber}
         </h1>
         <p className="text-sm text-muted-foreground capitalize">
-          Status: {bill.status} · Total {formatMoney(bill.totalCents, bill.currency)}{" "}
-          · Paid {formatMoney(bill.paidCents, bill.currency)} · Remaining{" "}
-          {formatMoney(remainingCents, bill.currency)}
+          Status: {bill.status} · Total {formatMoneyCents(bill.totalCents, bill.currency)}{" "}
+          · Paid {formatMoneyCents(bill.paidCents, bill.currency)} · Remaining{" "}
+          {formatMoneyCents(remainingCents, bill.currency)}
         </p>
       </div>
 
@@ -67,10 +61,10 @@ function VendorBillDetailPage() {
                 <td className="px-4 py-3">{item.description}</td>
                 <td className="px-4 py-3">{item.quantity}</td>
                 <td className="px-4 py-3">
-                  {formatMoney(item.unitCostCents, bill.currency)}
+                  {formatMoneyCents(item.unitCostCents, bill.currency)}
                 </td>
                 <td className="px-4 py-3">
-                  {formatMoney(item.quantity * item.unitCostCents, bill.currency)}
+                  {formatMoneyCents(item.quantity * item.unitCostCents, bill.currency)}
                 </td>
               </tr>
             ))}
@@ -97,7 +91,7 @@ function VendorBillDetailPage() {
                   {new Date(payment.paidAt).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3">
-                  {formatMoney(payment.amountCents, bill.currency)}
+                  {formatMoneyCents(payment.amountCents, bill.currency)}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
                   {payment.reference ?? payment.paymentMethod ?? "—"}

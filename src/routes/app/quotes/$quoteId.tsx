@@ -2,11 +2,10 @@ import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { buttonVariants } from "@/components/ui/button-variants"
-import { ServiceFieldValuesList } from "@/features/commercial/ServiceFieldValuesList"
+import { InvoiceLineItemsTable } from "@/features/commercial/InvoiceLineItemsTable"
+import { CommercialAttachmentsPanel } from "@/features/commercial/CommercialAttachmentsPanel"
 import { cn } from "@/lib/utils"
-import { parseFieldValuesJson } from "@/shared/commercial/service-fields"
 import {
-  convertQuoteToBookingFn,
   transitionQuoteStatusFn,
 } from "@/server/services/quotes/actions"
 import { loadQuoteDetailFn } from "@/server/services/quotes/loaders"
@@ -15,6 +14,7 @@ import {
   assertPermission,
   hasPermission,
 } from "@/shared/permissions"
+import { formatMoneyCents } from "@/shared/currency"
 
 export const Route = createFileRoute("/app/quotes/$quoteId")({
   staticData: {
@@ -27,10 +27,6 @@ export const Route = createFileRoute("/app/quotes/$quoteId")({
     loadQuoteDetailFn({ data: { quoteId: params.quoteId } }),
   component: QuoteDetailPage,
 })
-
-function formatMoney(cents: number, currency: string) {
-  return `${currency} ${(cents / 100).toFixed(2)}`
-}
 
 function QuoteDetailPage() {
   const router = useRouter()
@@ -62,19 +58,6 @@ function QuoteDetailPage() {
     await router.invalidate()
   }
 
-  async function convertToBooking() {
-    setMessage("")
-    const result = await convertQuoteToBookingFn({ data: { quoteId } })
-    if (!result.ok) {
-      setMessage(result.error.message)
-      return
-    }
-    await router.navigate({
-      to: "/app/bookings/$bookingId",
-      params: { bookingId: result.data.bookingId },
-    })
-  }
-
   return (
     <section className="space-y-8">
       <div className="space-y-2">
@@ -91,7 +74,7 @@ function QuoteDetailPage() {
         <p className="text-sm text-muted-foreground">
           {quote.customerDisplayName} ·{" "}
           <span className="capitalize">{quote.status}</span> ·{" "}
-          {formatMoney(quote.totalCents, quote.currency)}
+          {formatMoneyCents(quote.totalCents, quote.currency)}
         </p>
       </div>
 
@@ -124,13 +107,13 @@ function QuoteDetailPage() {
           </>
         ) : null}
         {quote.status === "accepted" && canConvert && !data.linkedBookingId ? (
-          <button
-            type="button"
+          <Link
+            to="/app/quotes/$quoteId/convert"
+            params={{ quoteId }}
             className={cn(buttonVariants(), "h-9")}
-            onClick={() => void convertToBooking()}
           >
             Convert to booking
-          </button>
+          </Link>
         ) : null}
         {data.linkedBookingId ? (
           <Link
@@ -149,41 +132,17 @@ function QuoteDetailPage() {
         </p>
       ) : null}
 
-      <div className="space-y-4">
-        {quote.items.map((item) => {
-          const schema = data.serviceSchemas[item.bookingServiceId]
-          const values = parseFieldValuesJson(item.fieldsJson)
+      <InvoiceLineItemsTable
+        phase="quote"
+        items={quote.items}
+        currency={quote.currency}
+        schemaMap={data.serviceSchemas}
+      />
 
-          return (
-            <div
-              key={item.id}
-              className="rounded-lg border border-border p-4 text-sm"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                  <p className="font-medium">{item.description}</p>
-                  {schema ? (
-                    <p className="text-xs text-muted-foreground">
-                      {schema.name} ({schema.code})
-                    </p>
-                  ) : null}
-                </div>
-                <p>
-                  {item.quantity} × {formatMoney(item.unitPriceCents, quote.currency)}{" "}
-                  ={" "}
-                  {formatMoney(
-                    item.quantity * item.unitPriceCents,
-                    quote.currency,
-                  )}
-                </p>
-              </div>
-              {schema ? (
-                <ServiceFieldValuesList fields={schema.quoteFields} values={values} />
-              ) : null}
-            </div>
-          )
-        })}
-      </div>
+      <CommercialAttachmentsPanel
+        documents={quote.documents}
+        vendorQuotes={quote.vendorQuotes}
+      />
     </section>
   )
 }

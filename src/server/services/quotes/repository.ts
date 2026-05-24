@@ -3,6 +3,7 @@ import { and, count, desc, eq } from "drizzle-orm"
 import type { MeridianDb } from "@/server/db/client"
 import { customers } from "@/server/db/schema/crm"
 import { bookingServices } from "@/server/db/schema/booking-services"
+import { vendors } from "@/server/db/schema/vendors"
 import {
   quoteAcceptanceEvents,
   quoteItems,
@@ -15,12 +16,14 @@ import type {
   QuoteListQuery,
 } from "@/shared/validation/dtos/commercial"
 import {
+  getEffectiveServiceFields,
   parseServiceFieldsJson,
   serializeFieldValues,
   validateFieldValues,
 } from "@/shared/commercial/service-fields"
 
 import type { QuoteSummary } from "@/server/services/commercial.contract"
+import { createCommercialAttachmentRepository } from "../commercial-attachments/repository"
 
 function lineTotalCents(item: QuoteItemInput) {
   return item.quantity * item.unitPriceCents
@@ -93,6 +96,12 @@ export function createQuoteRepository(db: MeridianDb) {
       }
 
       const items = await this.listQuoteItems(quoteId)
+      const attachmentRepo = createCommercialAttachmentRepository(db)
+      const attachments = await attachmentRepo.listForEntity(
+        agencyId,
+        "quote",
+        quoteId,
+      )
       const totalCents = items.reduce(
         (sum, item) => sum + item.quantity * item.unitPriceCents,
         0,
@@ -101,6 +110,8 @@ export function createQuoteRepository(db: MeridianDb) {
       return {
         ...row.quote,
         items,
+        documents: attachments.filter((row) => row.kind === "document"),
+        vendorQuotes: attachments.filter((row) => row.kind === "vendor_quote"),
         totalCents,
         customerDisplayName: row.customerDisplayName,
       }
@@ -148,6 +159,23 @@ export function createQuoteRepository(db: MeridianDb) {
 
       await this.insertQuoteItems(agencyId, quoteId, input.items)
       await this.recordVersion(agencyId, quoteId, 1, actorUserId)
+
+      const attachmentRepo = createCommercialAttachmentRepository(db)
+      await attachmentRepo.insertDocuments(
+        agencyId,
+        "quote",
+        quoteId,
+        actorUserId,
+        input.documents ?? [],
+      )
+      await attachmentRepo.insertVendorQuotes(
+        agencyId,
+        "quote",
+        quoteId,
+        actorUserId,
+        input.vendorQuotes ?? [],
+        (input.documents ?? []).length,
+      )
 
       return (await this.findQuoteById(agencyId, quoteId))!
     },
@@ -198,7 +226,9 @@ export function createQuoteRepository(db: MeridianDb) {
           return `Booking service ${item.bookingServiceId} is missing.`
         }
 
-        const schema = parseServiceFieldsJson(service.quoteFieldsSchemaJson)
+        const schema = getEffectiveServiceFields(
+          parseServiceFieldsJson(service.quoteFieldsSchemaJson),
+        )
         const error = validateFieldValues(schema, item.fields ?? {}, "quote")
         if (error) {
           return `${service.name}: ${error}`
@@ -284,6 +314,35 @@ export function createQuoteRepository(db: MeridianDb) {
 
         if (!row) {
           return `Booking service ${serviceId} is missing or inactive.`
+        }
+      }
+
+      return null
+    },
+
+    async validateVendorQuoteAttachments(
+      agencyId: string,
+      vendorQuotes: QuoteCreateInput["vendorQuotes"],
+    ) {
+      if (!vendorQuotes?.length) {
+        return null
+      }
+
+      for (const quote of vendorQuotes) {
+        const [vendor] = await db
+          .select({ id: vendors.id, name: vendors.name })
+          .from(vendors)
+          .where(
+            and(
+              eq(vendors.agencyId, agencyId),
+              eq(vendors.id, quote.vendorId),
+              eq(vendors.status, "active"),
+            ),
+          )
+          .limit(1)
+
+        if (!vendor) {
+          return `Vendor ${quote.vendorId} is missing or inactive.`
         }
       }
 

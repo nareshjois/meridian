@@ -8,8 +8,9 @@ export * from "./quotes"
 export * from "./bookings"
 export * from "./vendors"
 export * from "./forms"
-export * from "./accounting"
+export * from "./commercial-attachments"
 
+import { commercialAttachmentTables } from "./commercial-attachments"
 import { accountingTables } from "./accounting"
 import { authTables } from "./auth"
 import { bookingServiceTables } from "./booking-services"
@@ -32,6 +33,7 @@ export const meridianSchema = {
   ...bookingTables,
   ...vendorTables,
   ...formTables,
+  ...commercialAttachmentTables,
   ...accountingTables,
 } as const
 

@@ -5,11 +5,11 @@ import { createBookingServiceRepository } from "../booking-services/repository"
 
 export const DEFAULT_BOOKING_SERVICES: readonly BookingServiceCreateInput[] =
   [
-    { code: "FLIGHT", name: "Flight", category: "transport" },
-    { code: "TRAIN", name: "Train", category: "transport" },
-    { code: "VISA", name: "Visa", category: "documentation" },
-    { code: "HOTEL", name: "Hotel", category: "accommodation" },
-    { code: "INSURANCE", name: "Insurance", category: "protection" },
+    { code: "FLIGHT", name: "Flight", category: "transport", sameStartEndDefault: false },
+    { code: "TRAIN", name: "Train", category: "transport", sameStartEndDefault: false },
+    { code: "VISA", name: "Visa", category: "documentation", sameStartEndDefault: true },
+    { code: "HOTEL", name: "Hotel", category: "accommodation", sameStartEndDefault: false },
+    { code: "INSURANCE", name: "Insurance", category: "protection", sameStartEndDefault: true },
   ] as const
 
 export async function ensureCommercialSeed(db: MeridianDb, agencyId: string) {

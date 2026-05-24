@@ -1,6 +1,24 @@
 import { z } from "zod"
 
 import { nonEmptyStringSchema } from "../validation/common"
+import {
+  END_DATETIME_KEY,
+  isReservedFieldKey,
+  START_DATETIME_KEY,
+} from "./service-datetime"
+
+export {
+  BUILT_IN_DATETIME_FIELDS,
+  END_DATETIME_KEY,
+  RESERVED_FIELD_KEYS,
+  START_DATETIME_KEY,
+  applyStartEndSync,
+  formatDatetimeDisplay,
+  getCustomFieldsOnly,
+  getEffectiveServiceFields,
+  isReservedFieldKey,
+  toDatetimeLocalValue,
+} from "./service-datetime"
 
 export const bookingServiceFieldDefinitionSchema = z.object({
   key: z
@@ -11,7 +29,7 @@ export const bookingServiceFieldDefinitionSchema = z.object({
       "Field key must start with a letter and use lowercase letters, numbers, or underscores",
     ),
   label: nonEmptyStringSchema,
-  type: z.enum(["text", "number", "date", "textarea"]),
+  type: z.enum(["text", "number", "date", "datetime", "textarea"]),
   required: z.boolean().optional().default(false),
 })
 export type BookingServiceFieldDefinition = z.infer<
@@ -92,6 +110,27 @@ export function validateFieldValues(
     if (field.type === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
       return `${field.label} must be a date (YYYY-MM-DD).`
     }
+
+    if (field.type === "datetime") {
+      const date = new Date(value)
+      if (Number.isNaN(date.getTime())) {
+        return `${field.label} must be a valid date and time.`
+      }
+    }
+  }
+
+  const start = values[START_DATETIME_KEY]?.trim()
+  const end = values[END_DATETIME_KEY]?.trim()
+  if (start && end) {
+    const startMs = new Date(start).getTime()
+    const endMs = new Date(end).getTime()
+    if (
+      !Number.isNaN(startMs) &&
+      !Number.isNaN(endMs) &&
+      endMs < startMs
+    ) {
+      return "End must be on or after start."
+    }
   }
 
   return null
@@ -119,4 +158,15 @@ export function mergeFieldValuesForBookingConversion(
   }
 
   return merged
+}
+
+export function validateCustomFieldDefinitions(
+  fields: BookingServiceFieldDefinition[],
+): string | null {
+  for (const field of fields) {
+    if (isReservedFieldKey(field.key)) {
+      return `"${field.key}" is reserved for start/end schedule fields.`
+    }
+  }
+  return null
 }

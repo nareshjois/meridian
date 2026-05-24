@@ -18,7 +18,7 @@ export const quotes = sqliteTable(
     })
       .notNull()
       .default("draft"),
-    currency: text("currency").notNull().default("USD"),
+    currency: text("currency").notNull().default("INR"),
     validUntil: integer("valid_until", { mode: "timestamp_ms" }),
     notes: text("notes"),
     ...timestampColumns,
