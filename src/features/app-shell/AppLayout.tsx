@@ -1,8 +1,16 @@
 import { Outlet } from "@tanstack/react-router"
 
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
+import { ThemeToggle } from "@/components/theme-toggle"
 import type { SessionDto } from "@/shared/validation/dtos/auth"
 
-import { AppNav } from "./AppNav"
+import { AppBreadcrumb } from "./AppBreadcrumb"
+import { AppSidebar } from "./AppSidebar"
 
 type AppLayoutProps = {
   session: SessionDto
@@ -10,20 +18,21 @@ type AppLayoutProps = {
 
 export function AppLayout({ session }: AppLayoutProps) {
   return (
-    <div className="grid min-h-svh lg:grid-cols-[240px_1fr]">
-      <AppNav />
-      <div className="flex min-h-svh flex-col">
-        <header className="flex items-center justify-between border-b border-border px-6 py-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Signed in as</p>
-            <p className="font-medium">{session.user.displayName}</p>
+    <SidebarProvider>
+      <AppSidebar session={session} />
+      <SidebarInset>
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <AppBreadcrumb />
+          <div className="ml-auto">
+            <ThemeToggle />
           </div>
-          <p className="text-sm text-muted-foreground">{session.user.email}</p>
         </header>
         <main className="flex-1 p-6">
           <Outlet />
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

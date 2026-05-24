@@ -2,8 +2,9 @@ import { registerSessionResolver } from "@/server/auth/session"
 import { ensureDatabaseMigrated } from "@/server/db/migrate.server"
 import { getDb } from "@/server/db/client"
 import { readSessionIdFromCookie } from "@/server/auth/cookie-session"
-import { createMeridianServices, ensureDevSeed } from "@/server/services/users"
-import type { UserService } from "@/server/services/users/user.service"
+import { createMeridianServices } from "@/server/services/registry"
+import type { MeridianServiceRegistry } from "@/server/services/registry"
+import { ensureDevSeed } from "@/server/services/users"
 
 let bootstrapped = false
 
@@ -33,9 +34,6 @@ export async function ensureUserDomainReadyImpl() {
   bootstrapped = true
 }
 
-export function getServicesImpl(): Pick<
-  ReturnType<typeof createMeridianServices>,
-  "auth" | "users"
-> & { users: UserService } {
+export function getServicesImpl(): MeridianServiceRegistry {
   return createMeridianServices(getDb())
 }

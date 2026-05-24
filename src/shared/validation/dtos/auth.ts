@@ -61,3 +61,14 @@ export const activateSearchSchema = z.object({
   token: z.string().optional(),
 })
 export type ActivateSearchParams = z.infer<typeof activateSearchSchema>
+
+export const updateOwnProfileInputSchema = z.object({
+  displayName: nonEmptyStringSchema,
+})
+export type UpdateOwnProfileInput = z.infer<typeof updateOwnProfileInputSchema>
+
+export const changeOwnPasswordInputSchema = z.object({
+  currentPassword: nonEmptyStringSchema,
+  newPassword: nonEmptyStringSchema.min(8),
+})
+export type ChangeOwnPasswordInput = z.infer<typeof changeOwnPasswordInputSchema>

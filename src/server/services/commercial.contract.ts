@@ -14,8 +14,38 @@ import type {
   QuoteStatusTransitionInput,
 } from "@/shared/validation/dtos/commercial"
 import type { BookingService } from "@/server/db/schema/booking-services"
-import type { Booking } from "@/server/db/schema/bookings"
-import type { Quote } from "@/server/db/schema/quotes"
+import type {
+  Booking,
+  BookingItem,
+  BookingStatusHistory,
+  BookingTraveler,
+} from "@/server/db/schema/bookings"
+import type { Quote, QuoteItem } from "@/server/db/schema/quotes"
+import type { AssignBookingTravelerInput } from "@/shared/validation/dtos/commercial"
+
+export type QuoteSummary = Quote & {
+  customerDisplayName: string
+  totalCents: number
+}
+
+export type QuoteDetail = Quote & {
+  items: QuoteItem[]
+  totalCents: number
+  customerDisplayName: string
+}
+
+export type BookingSummary = Booking & {
+  customerDisplayName: string
+  totalCents: number
+}
+
+export type BookingDetail = Booking & {
+  items: BookingItem[]
+  statusHistory: BookingStatusHistory[]
+  travelers: BookingTraveler[]
+  totalCents: number
+  customerDisplayName: string
+}
 
 export interface BookingServiceCatalogContract {
   listServices(
@@ -36,19 +66,19 @@ export interface QuoteServiceContract {
   listQuotes(
     ctx: ServiceContext,
     query: QuoteListQuery,
-  ): Promise<ListResult<Quote>>
+  ): Promise<ListResult<QuoteSummary>>
   getQuoteById(
     ctx: ServiceContext,
     quoteId: string,
-  ): Promise<ServiceResult<Quote>>
+  ): Promise<ServiceResult<QuoteDetail>>
   createQuote(
     ctx: ServiceContext,
     input: QuoteCreateInput,
-  ): Promise<MutationResult<Quote>>
+  ): Promise<MutationResult<QuoteDetail>>
   transitionQuoteStatus(
     ctx: ServiceContext,
     input: QuoteStatusTransitionInput,
-  ): Promise<MutationResult<Quote>>
+  ): Promise<MutationResult<QuoteDetail>>
   convertToBooking(
     ctx: ServiceContext,
     input: ConvertQuoteToBookingInput,
@@ -59,15 +89,23 @@ export interface BookingServiceContract {
   listBookings(
     ctx: ServiceContext,
     query: BookingListQuery,
-  ): Promise<ListResult<Booking>>
+  ): Promise<ListResult<BookingSummary>>
   getBookingById(
     ctx: ServiceContext,
     bookingId: string,
-  ): Promise<ServiceResult<Booking>>
+  ): Promise<ServiceResult<BookingDetail>>
   transitionBookingStatus(
     ctx: ServiceContext,
     input: BookingStatusTransitionInput,
   ): Promise<MutationResult<Booking>>
+  assignTraveler(
+    ctx: ServiceContext,
+    input: AssignBookingTravelerInput,
+  ): Promise<MutationResult<BookingTraveler>>
+  removeTraveler(
+    ctx: ServiceContext,
+    input: { bookingId: string; travelerId: string },
+  ): Promise<MutationResult<{ success: true }>>
 }
 
 export type { BookingServiceCatalogContract as BookingServiceCatalog }

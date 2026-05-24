@@ -14,8 +14,32 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthActivateRouteImport } from './routes/auth/activate'
+import { Route as AppVendorsIndexRouteImport } from './routes/app/vendors/index'
 import { Route as AppUsersIndexRouteImport } from './routes/app/users/index'
+import { Route as AppQuotesIndexRouteImport } from './routes/app/quotes/index'
+import { Route as AppProfileIndexRouteImport } from './routes/app/profile/index'
+import { Route as AppGroupsIndexRouteImport } from './routes/app/groups/index'
+import { Route as AppCustomersIndexRouteImport } from './routes/app/customers/index'
+import { Route as AppCustomerFamiliesIndexRouteImport } from './routes/app/customer-families/index'
+import { Route as AppBookingsIndexRouteImport } from './routes/app/bookings/index'
+import { Route as AppBookingServicesIndexRouteImport } from './routes/app/booking-services/index'
+import { Route as AppAccountingIndexRouteImport } from './routes/app/accounting/index'
+import { Route as AppVendorsVendorIdRouteImport } from './routes/app/vendors/$vendorId'
 import { Route as AppUsersUserIdRouteImport } from './routes/app/users/$userId'
+import { Route as AppQuotesQuoteIdRouteImport } from './routes/app/quotes/$quoteId'
+import { Route as AppProfilePasswordRouteImport } from './routes/app/profile/password'
+import { Route as AppGroupsGroupIdRouteImport } from './routes/app/groups/$groupId'
+import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/customers/$customerId'
+import { Route as AppCustomerFamiliesFamilyIdRouteImport } from './routes/app/customer-families/$familyId'
+import { Route as AppBookingsBookingIdRouteImport } from './routes/app/bookings/$bookingId'
+import { Route as AppAccountingJournalIndexRouteImport } from './routes/app/accounting/journal/index'
+import { Route as AppAccountingAccountsIndexRouteImport } from './routes/app/accounting/accounts/index'
+import { Route as AppVendorsBillsBillIdRouteImport } from './routes/app/vendors/bills/$billId'
+import { Route as AppAccountingReportsTrialBalanceRouteImport } from './routes/app/accounting/reports/trial-balance'
+import { Route as AppAccountingReportsLedgerRouteImport } from './routes/app/accounting/reports/ledger'
+import { Route as AppAccountingReportsArRouteImport } from './routes/app/accounting/reports/ar'
+import { Route as AppAccountingReportsApRouteImport } from './routes/app/accounting/reports/ap'
+import { Route as AppAccountingJournalEntryIdRouteImport } from './routes/app/accounting/journal/$entryId'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/app',
@@ -42,9 +66,60 @@ const AuthActivateRoute = AuthActivateRouteImport.update({
   path: '/auth/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppVendorsIndexRoute = AppVendorsIndexRouteImport.update({
+  id: '/vendors/',
+  path: '/vendors/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppUsersIndexRoute = AppUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppQuotesIndexRoute = AppQuotesIndexRouteImport.update({
+  id: '/quotes/',
+  path: '/quotes/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProfileIndexRoute = AppProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppGroupsIndexRoute = AppGroupsIndexRouteImport.update({
+  id: '/groups/',
+  path: '/groups/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCustomersIndexRoute = AppCustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCustomerFamiliesIndexRoute =
+  AppCustomerFamiliesIndexRouteImport.update({
+    id: '/customer-families/',
+    path: '/customer-families/',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppBookingsIndexRoute = AppBookingsIndexRouteImport.update({
+  id: '/bookings/',
+  path: '/bookings/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppBookingServicesIndexRoute = AppBookingServicesIndexRouteImport.update({
+  id: '/booking-services/',
+  path: '/booking-services/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAccountingIndexRoute = AppAccountingIndexRouteImport.update({
+  id: '/accounting/',
+  path: '/accounting/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppVendorsVendorIdRoute = AppVendorsVendorIdRouteImport.update({
+  id: '/vendors/$vendorId',
+  path: '/vendors/$vendorId',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppUsersUserIdRoute = AppUsersUserIdRouteImport.update({
@@ -52,6 +127,82 @@ const AppUsersUserIdRoute = AppUsersUserIdRouteImport.update({
   path: '/users/$userId',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppQuotesQuoteIdRoute = AppQuotesQuoteIdRouteImport.update({
+  id: '/quotes/$quoteId',
+  path: '/quotes/$quoteId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProfilePasswordRoute = AppProfilePasswordRouteImport.update({
+  id: '/profile/password',
+  path: '/profile/password',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppGroupsGroupIdRoute = AppGroupsGroupIdRouteImport.update({
+  id: '/groups/$groupId',
+  path: '/groups/$groupId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCustomersCustomerIdRoute = AppCustomersCustomerIdRouteImport.update({
+  id: '/customers/$customerId',
+  path: '/customers/$customerId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCustomerFamiliesFamilyIdRoute =
+  AppCustomerFamiliesFamilyIdRouteImport.update({
+    id: '/customer-families/$familyId',
+    path: '/customer-families/$familyId',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppBookingsBookingIdRoute = AppBookingsBookingIdRouteImport.update({
+  id: '/bookings/$bookingId',
+  path: '/bookings/$bookingId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAccountingJournalIndexRoute =
+  AppAccountingJournalIndexRouteImport.update({
+    id: '/accounting/journal/',
+    path: '/accounting/journal/',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppAccountingAccountsIndexRoute =
+  AppAccountingAccountsIndexRouteImport.update({
+    id: '/accounting/accounts/',
+    path: '/accounting/accounts/',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppVendorsBillsBillIdRoute = AppVendorsBillsBillIdRouteImport.update({
+  id: '/vendors/bills/$billId',
+  path: '/vendors/bills/$billId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAccountingReportsTrialBalanceRoute =
+  AppAccountingReportsTrialBalanceRouteImport.update({
+    id: '/accounting/reports/trial-balance',
+    path: '/accounting/reports/trial-balance',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppAccountingReportsLedgerRoute =
+  AppAccountingReportsLedgerRouteImport.update({
+    id: '/accounting/reports/ledger',
+    path: '/accounting/reports/ledger',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppAccountingReportsArRoute = AppAccountingReportsArRouteImport.update({
+  id: '/accounting/reports/ar',
+  path: '/accounting/reports/ar',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAccountingReportsApRoute = AppAccountingReportsApRouteImport.update({
+  id: '/accounting/reports/ap',
+  path: '/accounting/reports/ap',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAccountingJournalEntryIdRoute =
+  AppAccountingJournalEntryIdRouteImport.update({
+    id: '/accounting/journal/$entryId',
+    path: '/accounting/journal/$entryId',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,16 +210,64 @@ export interface FileRoutesByFullPath {
   '/auth/activate': typeof AuthActivateRoute
   '/auth/login': typeof AuthLoginRoute
   '/app/': typeof AppIndexRoute
+  '/app/bookings/$bookingId': typeof AppBookingsBookingIdRoute
+  '/app/customer-families/$familyId': typeof AppCustomerFamiliesFamilyIdRoute
+  '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/app/groups/$groupId': typeof AppGroupsGroupIdRoute
+  '/app/profile/password': typeof AppProfilePasswordRoute
+  '/app/quotes/$quoteId': typeof AppQuotesQuoteIdRoute
   '/app/users/$userId': typeof AppUsersUserIdRoute
+  '/app/vendors/$vendorId': typeof AppVendorsVendorIdRoute
+  '/app/accounting/': typeof AppAccountingIndexRoute
+  '/app/booking-services/': typeof AppBookingServicesIndexRoute
+  '/app/bookings/': typeof AppBookingsIndexRoute
+  '/app/customer-families/': typeof AppCustomerFamiliesIndexRoute
+  '/app/customers/': typeof AppCustomersIndexRoute
+  '/app/groups/': typeof AppGroupsIndexRoute
+  '/app/profile/': typeof AppProfileIndexRoute
+  '/app/quotes/': typeof AppQuotesIndexRoute
   '/app/users/': typeof AppUsersIndexRoute
+  '/app/vendors/': typeof AppVendorsIndexRoute
+  '/app/accounting/journal/$entryId': typeof AppAccountingJournalEntryIdRoute
+  '/app/accounting/reports/ap': typeof AppAccountingReportsApRoute
+  '/app/accounting/reports/ar': typeof AppAccountingReportsArRoute
+  '/app/accounting/reports/ledger': typeof AppAccountingReportsLedgerRoute
+  '/app/accounting/reports/trial-balance': typeof AppAccountingReportsTrialBalanceRoute
+  '/app/vendors/bills/$billId': typeof AppVendorsBillsBillIdRoute
+  '/app/accounting/accounts/': typeof AppAccountingAccountsIndexRoute
+  '/app/accounting/journal/': typeof AppAccountingJournalIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/activate': typeof AuthActivateRoute
   '/auth/login': typeof AuthLoginRoute
   '/app': typeof AppIndexRoute
+  '/app/bookings/$bookingId': typeof AppBookingsBookingIdRoute
+  '/app/customer-families/$familyId': typeof AppCustomerFamiliesFamilyIdRoute
+  '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/app/groups/$groupId': typeof AppGroupsGroupIdRoute
+  '/app/profile/password': typeof AppProfilePasswordRoute
+  '/app/quotes/$quoteId': typeof AppQuotesQuoteIdRoute
   '/app/users/$userId': typeof AppUsersUserIdRoute
+  '/app/vendors/$vendorId': typeof AppVendorsVendorIdRoute
+  '/app/accounting': typeof AppAccountingIndexRoute
+  '/app/booking-services': typeof AppBookingServicesIndexRoute
+  '/app/bookings': typeof AppBookingsIndexRoute
+  '/app/customer-families': typeof AppCustomerFamiliesIndexRoute
+  '/app/customers': typeof AppCustomersIndexRoute
+  '/app/groups': typeof AppGroupsIndexRoute
+  '/app/profile': typeof AppProfileIndexRoute
+  '/app/quotes': typeof AppQuotesIndexRoute
   '/app/users': typeof AppUsersIndexRoute
+  '/app/vendors': typeof AppVendorsIndexRoute
+  '/app/accounting/journal/$entryId': typeof AppAccountingJournalEntryIdRoute
+  '/app/accounting/reports/ap': typeof AppAccountingReportsApRoute
+  '/app/accounting/reports/ar': typeof AppAccountingReportsArRoute
+  '/app/accounting/reports/ledger': typeof AppAccountingReportsLedgerRoute
+  '/app/accounting/reports/trial-balance': typeof AppAccountingReportsTrialBalanceRoute
+  '/app/vendors/bills/$billId': typeof AppVendorsBillsBillIdRoute
+  '/app/accounting/accounts': typeof AppAccountingAccountsIndexRoute
+  '/app/accounting/journal': typeof AppAccountingJournalIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,8 +276,32 @@ export interface FileRoutesById {
   '/auth/activate': typeof AuthActivateRoute
   '/auth/login': typeof AuthLoginRoute
   '/app/': typeof AppIndexRoute
+  '/app/bookings/$bookingId': typeof AppBookingsBookingIdRoute
+  '/app/customer-families/$familyId': typeof AppCustomerFamiliesFamilyIdRoute
+  '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/app/groups/$groupId': typeof AppGroupsGroupIdRoute
+  '/app/profile/password': typeof AppProfilePasswordRoute
+  '/app/quotes/$quoteId': typeof AppQuotesQuoteIdRoute
   '/app/users/$userId': typeof AppUsersUserIdRoute
+  '/app/vendors/$vendorId': typeof AppVendorsVendorIdRoute
+  '/app/accounting/': typeof AppAccountingIndexRoute
+  '/app/booking-services/': typeof AppBookingServicesIndexRoute
+  '/app/bookings/': typeof AppBookingsIndexRoute
+  '/app/customer-families/': typeof AppCustomerFamiliesIndexRoute
+  '/app/customers/': typeof AppCustomersIndexRoute
+  '/app/groups/': typeof AppGroupsIndexRoute
+  '/app/profile/': typeof AppProfileIndexRoute
+  '/app/quotes/': typeof AppQuotesIndexRoute
   '/app/users/': typeof AppUsersIndexRoute
+  '/app/vendors/': typeof AppVendorsIndexRoute
+  '/app/accounting/journal/$entryId': typeof AppAccountingJournalEntryIdRoute
+  '/app/accounting/reports/ap': typeof AppAccountingReportsApRoute
+  '/app/accounting/reports/ar': typeof AppAccountingReportsArRoute
+  '/app/accounting/reports/ledger': typeof AppAccountingReportsLedgerRoute
+  '/app/accounting/reports/trial-balance': typeof AppAccountingReportsTrialBalanceRoute
+  '/app/vendors/bills/$billId': typeof AppVendorsBillsBillIdRoute
+  '/app/accounting/accounts/': typeof AppAccountingAccountsIndexRoute
+  '/app/accounting/journal/': typeof AppAccountingJournalIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,16 +311,64 @@ export interface FileRouteTypes {
     | '/auth/activate'
     | '/auth/login'
     | '/app/'
+    | '/app/bookings/$bookingId'
+    | '/app/customer-families/$familyId'
+    | '/app/customers/$customerId'
+    | '/app/groups/$groupId'
+    | '/app/profile/password'
+    | '/app/quotes/$quoteId'
     | '/app/users/$userId'
+    | '/app/vendors/$vendorId'
+    | '/app/accounting/'
+    | '/app/booking-services/'
+    | '/app/bookings/'
+    | '/app/customer-families/'
+    | '/app/customers/'
+    | '/app/groups/'
+    | '/app/profile/'
+    | '/app/quotes/'
     | '/app/users/'
+    | '/app/vendors/'
+    | '/app/accounting/journal/$entryId'
+    | '/app/accounting/reports/ap'
+    | '/app/accounting/reports/ar'
+    | '/app/accounting/reports/ledger'
+    | '/app/accounting/reports/trial-balance'
+    | '/app/vendors/bills/$billId'
+    | '/app/accounting/accounts/'
+    | '/app/accounting/journal/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth/activate'
     | '/auth/login'
     | '/app'
+    | '/app/bookings/$bookingId'
+    | '/app/customer-families/$familyId'
+    | '/app/customers/$customerId'
+    | '/app/groups/$groupId'
+    | '/app/profile/password'
+    | '/app/quotes/$quoteId'
     | '/app/users/$userId'
+    | '/app/vendors/$vendorId'
+    | '/app/accounting'
+    | '/app/booking-services'
+    | '/app/bookings'
+    | '/app/customer-families'
+    | '/app/customers'
+    | '/app/groups'
+    | '/app/profile'
+    | '/app/quotes'
     | '/app/users'
+    | '/app/vendors'
+    | '/app/accounting/journal/$entryId'
+    | '/app/accounting/reports/ap'
+    | '/app/accounting/reports/ar'
+    | '/app/accounting/reports/ledger'
+    | '/app/accounting/reports/trial-balance'
+    | '/app/vendors/bills/$billId'
+    | '/app/accounting/accounts'
+    | '/app/accounting/journal'
   id:
     | '__root__'
     | '/'
@@ -105,8 +376,32 @@ export interface FileRouteTypes {
     | '/auth/activate'
     | '/auth/login'
     | '/app/'
+    | '/app/bookings/$bookingId'
+    | '/app/customer-families/$familyId'
+    | '/app/customers/$customerId'
+    | '/app/groups/$groupId'
+    | '/app/profile/password'
+    | '/app/quotes/$quoteId'
     | '/app/users/$userId'
+    | '/app/vendors/$vendorId'
+    | '/app/accounting/'
+    | '/app/booking-services/'
+    | '/app/bookings/'
+    | '/app/customer-families/'
+    | '/app/customers/'
+    | '/app/groups/'
+    | '/app/profile/'
+    | '/app/quotes/'
     | '/app/users/'
+    | '/app/vendors/'
+    | '/app/accounting/journal/$entryId'
+    | '/app/accounting/reports/ap'
+    | '/app/accounting/reports/ar'
+    | '/app/accounting/reports/ledger'
+    | '/app/accounting/reports/trial-balance'
+    | '/app/vendors/bills/$billId'
+    | '/app/accounting/accounts/'
+    | '/app/accounting/journal/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,11 +448,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/vendors/': {
+      id: '/app/vendors/'
+      path: '/vendors'
+      fullPath: '/app/vendors/'
+      preLoaderRoute: typeof AppVendorsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/app/users/': {
       id: '/app/users/'
       path: '/users'
       fullPath: '/app/users/'
       preLoaderRoute: typeof AppUsersIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/quotes/': {
+      id: '/app/quotes/'
+      path: '/quotes'
+      fullPath: '/app/quotes/'
+      preLoaderRoute: typeof AppQuotesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/profile/': {
+      id: '/app/profile/'
+      path: '/profile'
+      fullPath: '/app/profile/'
+      preLoaderRoute: typeof AppProfileIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/groups/': {
+      id: '/app/groups/'
+      path: '/groups'
+      fullPath: '/app/groups/'
+      preLoaderRoute: typeof AppGroupsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/customers/': {
+      id: '/app/customers/'
+      path: '/customers'
+      fullPath: '/app/customers/'
+      preLoaderRoute: typeof AppCustomersIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/customer-families/': {
+      id: '/app/customer-families/'
+      path: '/customer-families'
+      fullPath: '/app/customer-families/'
+      preLoaderRoute: typeof AppCustomerFamiliesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/bookings/': {
+      id: '/app/bookings/'
+      path: '/bookings'
+      fullPath: '/app/bookings/'
+      preLoaderRoute: typeof AppBookingsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/booking-services/': {
+      id: '/app/booking-services/'
+      path: '/booking-services'
+      fullPath: '/app/booking-services/'
+      preLoaderRoute: typeof AppBookingServicesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/accounting/': {
+      id: '/app/accounting/'
+      path: '/accounting'
+      fullPath: '/app/accounting/'
+      preLoaderRoute: typeof AppAccountingIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/vendors/$vendorId': {
+      id: '/app/vendors/$vendorId'
+      path: '/vendors/$vendorId'
+      fullPath: '/app/vendors/$vendorId'
+      preLoaderRoute: typeof AppVendorsVendorIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/app/users/$userId': {
@@ -167,19 +532,165 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUsersUserIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/app/quotes/$quoteId': {
+      id: '/app/quotes/$quoteId'
+      path: '/quotes/$quoteId'
+      fullPath: '/app/quotes/$quoteId'
+      preLoaderRoute: typeof AppQuotesQuoteIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/profile/password': {
+      id: '/app/profile/password'
+      path: '/profile/password'
+      fullPath: '/app/profile/password'
+      preLoaderRoute: typeof AppProfilePasswordRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/groups/$groupId': {
+      id: '/app/groups/$groupId'
+      path: '/groups/$groupId'
+      fullPath: '/app/groups/$groupId'
+      preLoaderRoute: typeof AppGroupsGroupIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/customers/$customerId': {
+      id: '/app/customers/$customerId'
+      path: '/customers/$customerId'
+      fullPath: '/app/customers/$customerId'
+      preLoaderRoute: typeof AppCustomersCustomerIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/customer-families/$familyId': {
+      id: '/app/customer-families/$familyId'
+      path: '/customer-families/$familyId'
+      fullPath: '/app/customer-families/$familyId'
+      preLoaderRoute: typeof AppCustomerFamiliesFamilyIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/bookings/$bookingId': {
+      id: '/app/bookings/$bookingId'
+      path: '/bookings/$bookingId'
+      fullPath: '/app/bookings/$bookingId'
+      preLoaderRoute: typeof AppBookingsBookingIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/accounting/journal/': {
+      id: '/app/accounting/journal/'
+      path: '/accounting/journal'
+      fullPath: '/app/accounting/journal/'
+      preLoaderRoute: typeof AppAccountingJournalIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/accounting/accounts/': {
+      id: '/app/accounting/accounts/'
+      path: '/accounting/accounts'
+      fullPath: '/app/accounting/accounts/'
+      preLoaderRoute: typeof AppAccountingAccountsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/vendors/bills/$billId': {
+      id: '/app/vendors/bills/$billId'
+      path: '/vendors/bills/$billId'
+      fullPath: '/app/vendors/bills/$billId'
+      preLoaderRoute: typeof AppVendorsBillsBillIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/accounting/reports/trial-balance': {
+      id: '/app/accounting/reports/trial-balance'
+      path: '/accounting/reports/trial-balance'
+      fullPath: '/app/accounting/reports/trial-balance'
+      preLoaderRoute: typeof AppAccountingReportsTrialBalanceRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/accounting/reports/ledger': {
+      id: '/app/accounting/reports/ledger'
+      path: '/accounting/reports/ledger'
+      fullPath: '/app/accounting/reports/ledger'
+      preLoaderRoute: typeof AppAccountingReportsLedgerRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/accounting/reports/ar': {
+      id: '/app/accounting/reports/ar'
+      path: '/accounting/reports/ar'
+      fullPath: '/app/accounting/reports/ar'
+      preLoaderRoute: typeof AppAccountingReportsArRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/accounting/reports/ap': {
+      id: '/app/accounting/reports/ap'
+      path: '/accounting/reports/ap'
+      fullPath: '/app/accounting/reports/ap'
+      preLoaderRoute: typeof AppAccountingReportsApRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/accounting/journal/$entryId': {
+      id: '/app/accounting/journal/$entryId'
+      path: '/accounting/journal/$entryId'
+      fullPath: '/app/accounting/journal/$entryId'
+      preLoaderRoute: typeof AppAccountingJournalEntryIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
 interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
+  AppBookingsBookingIdRoute: typeof AppBookingsBookingIdRoute
+  AppCustomerFamiliesFamilyIdRoute: typeof AppCustomerFamiliesFamilyIdRoute
+  AppCustomersCustomerIdRoute: typeof AppCustomersCustomerIdRoute
+  AppGroupsGroupIdRoute: typeof AppGroupsGroupIdRoute
+  AppProfilePasswordRoute: typeof AppProfilePasswordRoute
+  AppQuotesQuoteIdRoute: typeof AppQuotesQuoteIdRoute
   AppUsersUserIdRoute: typeof AppUsersUserIdRoute
+  AppVendorsVendorIdRoute: typeof AppVendorsVendorIdRoute
+  AppAccountingIndexRoute: typeof AppAccountingIndexRoute
+  AppBookingServicesIndexRoute: typeof AppBookingServicesIndexRoute
+  AppBookingsIndexRoute: typeof AppBookingsIndexRoute
+  AppCustomerFamiliesIndexRoute: typeof AppCustomerFamiliesIndexRoute
+  AppCustomersIndexRoute: typeof AppCustomersIndexRoute
+  AppGroupsIndexRoute: typeof AppGroupsIndexRoute
+  AppProfileIndexRoute: typeof AppProfileIndexRoute
+  AppQuotesIndexRoute: typeof AppQuotesIndexRoute
   AppUsersIndexRoute: typeof AppUsersIndexRoute
+  AppVendorsIndexRoute: typeof AppVendorsIndexRoute
+  AppAccountingJournalEntryIdRoute: typeof AppAccountingJournalEntryIdRoute
+  AppAccountingReportsApRoute: typeof AppAccountingReportsApRoute
+  AppAccountingReportsArRoute: typeof AppAccountingReportsArRoute
+  AppAccountingReportsLedgerRoute: typeof AppAccountingReportsLedgerRoute
+  AppAccountingReportsTrialBalanceRoute: typeof AppAccountingReportsTrialBalanceRoute
+  AppVendorsBillsBillIdRoute: typeof AppVendorsBillsBillIdRoute
+  AppAccountingAccountsIndexRoute: typeof AppAccountingAccountsIndexRoute
+  AppAccountingJournalIndexRoute: typeof AppAccountingJournalIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
+  AppBookingsBookingIdRoute: AppBookingsBookingIdRoute,
+  AppCustomerFamiliesFamilyIdRoute: AppCustomerFamiliesFamilyIdRoute,
+  AppCustomersCustomerIdRoute: AppCustomersCustomerIdRoute,
+  AppGroupsGroupIdRoute: AppGroupsGroupIdRoute,
+  AppProfilePasswordRoute: AppProfilePasswordRoute,
+  AppQuotesQuoteIdRoute: AppQuotesQuoteIdRoute,
   AppUsersUserIdRoute: AppUsersUserIdRoute,
+  AppVendorsVendorIdRoute: AppVendorsVendorIdRoute,
+  AppAccountingIndexRoute: AppAccountingIndexRoute,
+  AppBookingServicesIndexRoute: AppBookingServicesIndexRoute,
+  AppBookingsIndexRoute: AppBookingsIndexRoute,
+  AppCustomerFamiliesIndexRoute: AppCustomerFamiliesIndexRoute,
+  AppCustomersIndexRoute: AppCustomersIndexRoute,
+  AppGroupsIndexRoute: AppGroupsIndexRoute,
+  AppProfileIndexRoute: AppProfileIndexRoute,
+  AppQuotesIndexRoute: AppQuotesIndexRoute,
   AppUsersIndexRoute: AppUsersIndexRoute,
+  AppVendorsIndexRoute: AppVendorsIndexRoute,
+  AppAccountingJournalEntryIdRoute: AppAccountingJournalEntryIdRoute,
+  AppAccountingReportsApRoute: AppAccountingReportsApRoute,
+  AppAccountingReportsArRoute: AppAccountingReportsArRoute,
+  AppAccountingReportsLedgerRoute: AppAccountingReportsLedgerRoute,
+  AppAccountingReportsTrialBalanceRoute: AppAccountingReportsTrialBalanceRoute,
+  AppVendorsBillsBillIdRoute: AppVendorsBillsBillIdRoute,
+  AppAccountingAccountsIndexRoute: AppAccountingAccountsIndexRoute,
+  AppAccountingJournalIndexRoute: AppAccountingJournalIndexRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(

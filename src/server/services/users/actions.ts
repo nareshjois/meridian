@@ -12,9 +12,11 @@ import type { RouteActionResult, RouteServiceError } from "@/shared/routes/contr
 import {
   activateInviteInputSchema,
   assignRoleInputSchema,
+  changeOwnPasswordInputSchema,
   inviteUserInputSchema,
   loginInputSchema,
   setUserStatusInputSchema,
+  updateOwnProfileInputSchema,
 } from "@/shared/validation/dtos/auth"
 import type { SessionDto } from "@/shared/validation/dtos/auth"
 
@@ -149,6 +151,58 @@ export const assignRoleFn = createServerFn({ method: "POST" })
     return result.ok
       ? { ok: true as const, data: result.data }
       : { ok: false as const, error: toActionError(result.error) }
+  })
+
+async function withAuthenticatedUser<T>(
+  handler: (
+    users: Awaited<ReturnType<typeof getAuthServices>>["users"],
+    context: ReturnType<typeof createServiceContext>,
+  ) => Promise<T>,
+): Promise<T | { ok: false; error: RouteServiceError }> {
+  const { auth, users } = await getAuthServices()
+  const sessionId = readSessionIdFromCookie()
+  if (!sessionId) {
+    return {
+      ok: false as const,
+      error: { code: "UNAUTHORIZED" as const, message: "Sign in required." },
+    }
+  }
+
+  const session = await auth.getSession(sessionId)
+  if (!session.ok || !session.data) {
+    return {
+      ok: false as const,
+      error: { code: "UNAUTHORIZED" as const, message: "Sign in required." },
+    }
+  }
+
+  return handler(users, createServiceContext(session.data))
+}
+
+export const updateOwnProfileFn = createServerFn({ method: "POST" })
+  .inputValidator((payload: unknown) => updateOwnProfileInputSchema.parse(payload))
+  .handler(async ({ data }) => {
+    const authResult = await withAuthenticatedUser(async (users, ctx) => {
+      const result = await users.updateOwnProfile(ctx, data)
+      return result.ok
+        ? { ok: true as const, data: result.data }
+        : { ok: false as const, error: toActionError(result.error) }
+    })
+
+    return authResult
+  })
+
+export const changeOwnPasswordFn = createServerFn({ method: "POST" })
+  .inputValidator((payload: unknown) => changeOwnPasswordInputSchema.parse(payload))
+  .handler(async ({ data }) => {
+    const authResult = await withAuthenticatedUser(async (users, ctx) => {
+      const result = await users.changeOwnPassword(ctx, data)
+      return result.ok
+        ? { ok: true as const, data: result.data }
+        : { ok: false as const, error: toActionError(result.error) }
+    })
+
+    return authResult
   })
 
 export const removeRoleFn = createServerFn({ method: "POST" })

@@ -6,9 +6,13 @@ import type {
 } from "./_types"
 import type {
   AccountCreateInput,
+  ApSummaryQuery,
+  ArSummaryQuery,
   BookingConfirmedEvent,
+  JournalListQuery,
   LedgerQuery,
   PostJournalEntryInput,
+  RepostJournalEntryInput,
   ReverseJournalEntryInput,
   TrialBalanceQuery,
   VendorBillPostedEvent,
@@ -36,6 +40,14 @@ export interface AccountingServiceContract {
     ctx: ServiceContext,
     input: ReverseJournalEntryInput,
   ): Promise<MutationResult<JournalEntry>>
+  repostEntry(
+    ctx: ServiceContext,
+    input: RepostJournalEntryInput,
+  ): Promise<MutationResult<JournalEntry>>
+  listJournalEntries(
+    ctx: ServiceContext,
+    query: JournalListQuery,
+  ): Promise<ListResult<unknown>>
   getLedger(
     ctx: ServiceContext,
     query: LedgerQuery,
@@ -44,6 +56,16 @@ export interface AccountingServiceContract {
     ctx: ServiceContext,
     query: TrialBalanceQuery,
   ): Promise<ServiceResult<{ rows: unknown[]; netDifferenceCents: number }>>
+  getAccountsReceivableSummary(
+    ctx: ServiceContext,
+    query: ArSummaryQuery,
+  ): Promise<
+    ServiceResult<{ rows: unknown[]; totalReceivableCents: number }>
+  >
+  getAccountsPayableSummary(
+    ctx: ServiceContext,
+    query: ApSummaryQuery,
+  ): Promise<ServiceResult<{ rows: unknown[]; totalPayableCents: number }>>
   handleBookingConfirmed(
     ctx: ServiceContext,
     event: BookingConfirmedEvent,

@@ -10,7 +10,7 @@ import type { ActivateInviteInput } from "@/shared/validation/dtos/auth"
 
 import { INVITE_TTL_MS, SESSION_TTL_MS } from "./constants"
 import { createAuthService } from "./auth.service"
-import { generateToken, hashPassword } from "./crypto"
+import { generateToken, hashPassword, verifyPassword } from "./crypto"
 import {
   permissionForManageRoles,
   permissionForUserInvite,
@@ -239,6 +239,57 @@ export function createUserService(db: MeridianDb): UserServiceContract & {
       }
 
       await repo.removeRole(input.userId, input.roleId)
+      return serviceOk({ success: true })
+    },
+
+    async updateOwnProfile(ctx, input) {
+      const user = await repo.findUserById(ctx.agencyId, ctx.actorUserId)
+      if (!user) {
+        return serviceErr({ code: "NOT_FOUND", message: "User not found." })
+      }
+
+      if (user.status !== "active") {
+        return serviceErr({
+          code: "FORBIDDEN",
+          message: "Only active accounts can update their profile.",
+        })
+      }
+
+      const displayName = input.displayName.trim()
+      await repo.updateUser(user.id, { displayName })
+
+      return serviceOk({
+        id: user.id,
+        email: user.email,
+        displayName,
+        status: user.status,
+      })
+    },
+
+    async changeOwnPassword(ctx, input) {
+      const user = await repo.findUserById(ctx.agencyId, ctx.actorUserId)
+      if (!user) {
+        return serviceErr({ code: "NOT_FOUND", message: "User not found." })
+      }
+
+      if (user.status !== "active") {
+        return serviceErr({
+          code: "FORBIDDEN",
+          message: "Only active accounts can change their password.",
+        })
+      }
+
+      if (!user.passwordHash || !verifyPassword(input.currentPassword, user.passwordHash)) {
+        return serviceErr({
+          code: "UNAUTHORIZED",
+          message: "Current password is incorrect.",
+        })
+      }
+
+      await repo.updateUser(user.id, {
+        passwordHash: hashPassword(input.newPassword),
+      })
+
       return serviceOk({ success: true })
     },
 

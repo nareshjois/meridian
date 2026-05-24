@@ -54,14 +54,41 @@ export const trialBalanceQuerySchema = z.object({
 })
 export type TrialBalanceQuery = z.infer<typeof trialBalanceQuerySchema>
 
-/** Business event payloads consumed by accounting integration (Gate 2). */
-export const bookingConfirmedEventSchema = z.object({
-  bookingId: idSchema,
-  totalReceivableCents: moneyCentsSchema,
-  revenueAccountId: idSchema,
-  receivableAccountId: idSchema,
+export const journalListQuerySchema = createListQuerySchema({
+  fromDate: z.coerce.date().optional(),
+  toDate: z.coerce.date().optional(),
+  sourceType: z.string().optional(),
 })
-export type BookingConfirmedEvent = z.infer<typeof bookingConfirmedEventSchema>
+export type JournalListQuery = z.infer<typeof journalListQuerySchema>
+
+export const arSummaryQuerySchema = z.object({
+  asOfDate: z.coerce.date().optional(),
+})
+export type ArSummaryQuery = z.infer<typeof arSummaryQuerySchema>
+
+export const apSummaryQuerySchema = z.object({
+  asOfDate: z.coerce.date().optional(),
+})
+export type ApSummaryQuery = z.infer<typeof apSummaryQuerySchema>
+
+export const repostJournalEntryInputSchema = z.object({
+  entryId: idSchema,
+  entryDate: z.coerce.date(),
+  memo: z.string().optional(),
+  lines: z.array(journalLineInputSchema).min(2),
+  sourceType: nonEmptyStringSchema,
+  sourceId: idSchema,
+  eventType: nonEmptyStringSchema,
+})
+export type RepostJournalEntryInput = z.infer<
+  typeof repostJournalEntryInputSchema
+>
+
+/** @deprecated Import from commercial-events; kept for accounting contract stability. */
+export {
+  bookingConfirmedEventSchema,
+  type BookingConfirmedEvent,
+} from "./commercial-events"
 
 export const vendorBillPostedEventSchema = z.object({
   vendorBillId: idSchema,

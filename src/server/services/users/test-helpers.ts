@@ -9,9 +9,9 @@ import type { MeridianDb } from "@/server/db/client"
 import {
   DEFAULT_DEV_ADMIN,
   DEFAULT_DEV_AGENCY,
-  createMeridianServices,
   ensureDevSeed,
 } from "@/server/services/users"
+import { createMeridianServices } from "@/server/services/registry"
 import { createServiceContext } from "@/server/auth/session"
 import type { SessionDto } from "@/shared/validation/dtos/auth"
 import { PERMISSION_KEYS } from "@/shared/permissions"
@@ -51,4 +51,5 @@ export function adminContext(session: SessionDto) {
   return createServiceContext(session)
 }
 
+export { createMeridianServices } from "@/server/services/registry"
 export { DEFAULT_DEV_ADMIN, DEFAULT_DEV_AGENCY, PERMISSION_KEYS }

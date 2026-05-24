@@ -82,3 +82,20 @@ export const bookingListQuerySchema = createListQuerySchema({
     .optional(),
 })
 export type BookingListQuery = z.infer<typeof bookingListQuerySchema>
+
+export const assignBookingTravelerInputSchema = z.object({
+  bookingId: idSchema,
+  customerId: idSchema,
+  travelerRole: z.string().trim().min(1).default("traveler"),
+})
+export type AssignBookingTravelerInput = z.infer<
+  typeof assignBookingTravelerInputSchema
+>
+
+export const removeBookingTravelerInputSchema = z.object({
+  bookingId: idSchema,
+  travelerId: idSchema,
+})
+export type RemoveBookingTravelerInput = z.infer<
+  typeof removeBookingTravelerInputSchema
+>

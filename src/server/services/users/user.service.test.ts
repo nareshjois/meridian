@@ -4,6 +4,7 @@ import { PERMISSION_KEYS } from "@/shared/permissions"
 
 import { verifyPassword, hashPassword } from "./crypto"
 import {
+  DEFAULT_DEV_ADMIN,
   adminContext,
   createTestDb,
   loginAsAdmin,
@@ -147,6 +148,34 @@ describe("user management service", () => {
       roleId: viewerRole!.id,
     })
     expect(remove.ok).toBe(true)
+  })
+
+  it("updates own profile and changes own password", async () => {
+    const db = createTestDb()
+    await seedTestAgency(db)
+    const { users } = createMeridianServices(db)
+    const adminSession = await loginAsAdmin(db)
+    const ctx = adminContext(adminSession)
+
+    const profile = await users.updateOwnProfile(ctx, {
+      displayName: "Agency Admin",
+    })
+    expect(profile.ok).toBe(true)
+    if (profile.ok) {
+      expect(profile.data.displayName).toBe("Agency Admin")
+    }
+
+    const wrongPassword = await users.changeOwnPassword(ctx, {
+      currentPassword: "wrong-password",
+      newPassword: "new-secure-password",
+    })
+    expect(wrongPassword.ok).toBe(false)
+
+    const password = await users.changeOwnPassword(ctx, {
+      currentPassword: DEFAULT_DEV_ADMIN.password,
+      newPassword: "new-secure-password",
+    })
+    expect(password.ok).toBe(true)
   })
 })
 

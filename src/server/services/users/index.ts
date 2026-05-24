@@ -1,13 +1,11 @@
 import { ALL_PERMISSION_KEYS, PERMISSION_KEYS } from "@/shared/permissions"
 import type { PermissionKey } from "@/shared/permissions"
 import type { MeridianDb } from "@/server/db/client"
-import type { MeridianServices } from "@/server/services"
+import { ensureAccountingSeed } from "@/server/services/accounting/seed"
+import { ensureCommercialSeed } from "@/server/services/commercial/seed"
 
-import { createAuthService } from "./auth.service"
 import { hashPassword } from "./crypto"
 import { createUserRepository } from "./repository"
-import { createUserService } from "./user.service"
-import type { UserService } from "./user.service"
 
 const READ_PERMISSION_KEYS = ALL_PERMISSION_KEYS.filter((key) =>
   key.endsWith(".read"),
@@ -46,17 +44,12 @@ export async function ensureDevSeed(db: MeridianDb) {
     readPermissionKeys: READ_PERMISSION_KEYS,
     staffPermissionKeys: STAFF_PERMISSION_KEYS,
   })
+
+  await ensureCommercialSeed(db, DEFAULT_DEV_AGENCY.id)
+  await ensureAccountingSeed(db, DEFAULT_DEV_AGENCY.id)
 }
 
-export function createMeridianServices(db: MeridianDb): Pick<
-  MeridianServices,
-  "auth" | "users"
-> & { users: UserService } {
-  return {
-    auth: createAuthService(db),
-    users: createUserService(db),
-  }
-}
+export { createMeridianServices } from "@/server/services/registry"
 
 export type { UserService } from "./user.service"
 

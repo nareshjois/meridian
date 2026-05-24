@@ -8,9 +8,11 @@ import type {
 import type {
   ActivateInviteInput,
   AssignRoleInput,
+  ChangeOwnPasswordInput,
   InviteUserInput,
   LoginInput,
   SessionDto,
+  UpdateOwnProfileInput,
 } from "@/shared/validation/dtos/auth"
 
 export interface AuthServiceContract {
@@ -58,6 +60,19 @@ export interface UserServiceContract {
   removeRole(
     ctx: ServiceContext,
     input: AssignRoleInput,
+  ): Promise<VoidMutationResult>
+  updateOwnProfile(
+    ctx: ServiceContext,
+    input: UpdateOwnProfileInput,
+  ): Promise<ServiceResult<{
+    id: string
+    email: string
+    displayName: string
+    status: "invited" | "active" | "inactive"
+  }>>
+  changeOwnPassword(
+    ctx: ServiceContext,
+    input: ChangeOwnPasswordInput,
   ): Promise<VoidMutationResult>
 }
 
