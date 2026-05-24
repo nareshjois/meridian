@@ -11,4 +11,8 @@ count.txt
 .output
 .vinxi
 __unconfig*
-todos.json
+data/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
