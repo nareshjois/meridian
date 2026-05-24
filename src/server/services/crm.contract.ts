@@ -39,6 +39,10 @@ export interface CustomerServiceContract {
     customerId: string,
     input: CustomerUpdateInput,
   ): Promise<MutationResult<Customer>>
+  deleteCustomer(
+    ctx: ServiceContext,
+    customerId: string,
+  ): Promise<VoidMutationResult>
 }
 
 export interface CustomerFamilyServiceContract {
@@ -57,6 +61,10 @@ export interface CustomerFamilyServiceContract {
   removeMember(
     ctx: ServiceContext,
     input: { familyId: string; customerId: string },
+  ): Promise<VoidMutationResult>
+  deleteFamily(
+    ctx: ServiceContext,
+    familyId: string,
   ): Promise<VoidMutationResult>
 }
 
@@ -77,6 +85,7 @@ export interface GroupServiceContract {
     ctx: ServiceContext,
     input: { groupId: string; customerId: string },
   ): Promise<VoidMutationResult>
+  deleteGroup(ctx: ServiceContext, groupId: string): Promise<VoidMutationResult>
 }
 
 export type { CustomerServiceContract as CustomerService }

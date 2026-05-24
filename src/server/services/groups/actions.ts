@@ -104,3 +104,23 @@ export const removeGroupMemberFn = createServerFn({ method: "POST" })
         >)
       : ({ ok: false as const, error: toActionError(result.error) })
   })
+
+const deleteGroupPayloadSchema = z.object({
+  groupId: idSchema,
+})
+
+export const deleteGroupFn = createServerFn({ method: "POST" })
+  .inputValidator((payload: unknown) => deleteGroupPayloadSchema.parse(payload))
+  .handler(async ({ data }) => {
+    const session = await requireSessionContext()
+    if (!session.ok) {
+      return session
+    }
+
+    const result = await session.groups.deleteGroup(session.ctx, data.groupId)
+    return result.ok
+      ? ({ ok: true as const, data: result.data } satisfies RouteActionResult<
+          (typeof result)["data"]
+        >)
+      : ({ ok: false as const, error: toActionError(result.error) })
+  })

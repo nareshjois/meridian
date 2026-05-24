@@ -1,6 +1,7 @@
 import { and, count, desc, eq, like } from "drizzle-orm"
 
 import type { MeridianDb } from "@/server/db/client"
+import { bookings } from "@/server/db/schema/bookings"
 import { customers } from "@/server/db/schema/crm"
 import { groupMembers, travelGroups } from "@/server/db/schema/groups"
 import type {
@@ -160,6 +161,40 @@ export class GroupRepository {
           eq(groupMembers.customerId, customerId),
         ),
       )
+  }
+
+  async deleteGroup(agencyId: string, groupId: string) {
+    await this.db
+      .delete(travelGroups)
+      .where(
+        and(eq(travelGroups.agencyId, agencyId), eq(travelGroups.id, groupId)),
+      )
+  }
+
+  async getGroupDeleteBlockers(agencyId: string, groupId: string) {
+    const [groupRow] = await this.db
+      .select({ id: travelGroups.id })
+      .from(travelGroups)
+      .where(
+        and(eq(travelGroups.agencyId, agencyId), eq(travelGroups.id, groupId)),
+      )
+      .limit(1)
+
+    const [bookingRow] = await this.db
+      .select({ total: count() })
+      .from(bookings)
+      .where(and(eq(bookings.agencyId, agencyId), eq(bookings.groupId, groupId)))
+
+    const bookingCount = bookingRow?.total ?? 0
+    const blockers =
+      bookingCount > 0
+        ? [`${bookingCount} booking${bookingCount === 1 ? "" : "s"}`]
+        : []
+
+    return {
+      exists: Boolean(groupRow),
+      blockers,
+    }
   }
 }
 

@@ -2,7 +2,9 @@ import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { buttonVariants } from "@/components/ui/button-variants"
+import { ServiceFieldValuesList } from "@/features/commercial/ServiceFieldValuesList"
 import { cn } from "@/lib/utils"
+import { parseFieldValuesJson } from "@/shared/commercial/service-fields"
 import {
   convertQuoteToBookingFn,
   transitionQuoteStatusFn,
@@ -147,34 +149,40 @@ function QuoteDetailPage() {
         </p>
       ) : null}
 
-      <div className="overflow-hidden rounded-lg border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/40 text-left">
-            <tr>
-              <th className="px-4 py-3 font-medium">Description</th>
-              <th className="px-4 py-3 font-medium">Qty</th>
-              <th className="px-4 py-3 font-medium">Unit</th>
-              <th className="px-4 py-3 font-medium">Line total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {quote.items.map((item) => (
-              <tr key={item.id} className="border-t border-border">
-                <td className="px-4 py-3">{item.description}</td>
-                <td className="px-4 py-3">{item.quantity}</td>
-                <td className="px-4 py-3">
-                  {formatMoney(item.unitPriceCents, quote.currency)}
-                </td>
-                <td className="px-4 py-3">
+      <div className="space-y-4">
+        {quote.items.map((item) => {
+          const schema = data.serviceSchemas[item.bookingServiceId]
+          const values = parseFieldValuesJson(item.fieldsJson)
+
+          return (
+            <div
+              key={item.id}
+              className="rounded-lg border border-border p-4 text-sm"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="font-medium">{item.description}</p>
+                  {schema ? (
+                    <p className="text-xs text-muted-foreground">
+                      {schema.name} ({schema.code})
+                    </p>
+                  ) : null}
+                </div>
+                <p>
+                  {item.quantity} × {formatMoney(item.unitPriceCents, quote.currency)}{" "}
+                  ={" "}
                   {formatMoney(
                     item.quantity * item.unitPriceCents,
                     quote.currency,
                   )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </p>
+              </div>
+              {schema ? (
+                <ServiceFieldValuesList fields={schema.quoteFields} values={values} />
+              ) : null}
+            </div>
+          )
+        })}
       </div>
     </section>
   )

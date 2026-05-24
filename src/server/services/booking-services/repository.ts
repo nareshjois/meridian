@@ -2,7 +2,14 @@ import { and, asc, count, eq } from "drizzle-orm"
 
 import type { MeridianDb } from "@/server/db/client"
 import { bookingServices } from "@/server/db/schema/booking-services"
-import type { BookingServiceCreateInput } from "@/shared/validation/dtos/commercial"
+import {
+  parseServiceFieldsJson,
+  serializeServiceFields,
+} from "@/shared/commercial/service-fields"
+import type {
+  BookingServiceCreateInput,
+  BookingServiceFieldsInput,
+} from "@/shared/validation/dtos/commercial"
 
 export function createBookingServiceRepository(db: MeridianDb) {
   return {
@@ -61,6 +68,10 @@ export function createBookingServiceRepository(db: MeridianDb) {
         category: input.category.trim(),
         isActive: true,
         defaultRevenueAccountId: input.defaultRevenueAccountId ?? null,
+        quoteFieldsSchemaJson: serializeServiceFields(input.quoteFields ?? []),
+        bookingFieldsSchemaJson: serializeServiceFields(
+          input.bookingFields ?? [],
+        ),
         createdAt: now,
         updatedAt: now,
       })
@@ -81,6 +92,41 @@ export function createBookingServiceRepository(db: MeridianDb) {
         )
 
       return this.findById(agencyId, serviceId)
+    },
+
+    async updateFieldSchemas(
+      agencyId: string,
+      serviceId: string,
+      input: BookingServiceFieldsInput,
+    ) {
+      const now = new Date()
+      await db
+        .update(bookingServices)
+        .set({
+          quoteFieldsSchemaJson: serializeServiceFields(input.quoteFields),
+          bookingFieldsSchemaJson: serializeServiceFields(input.bookingFields),
+          updatedAt: now,
+        })
+        .where(
+          and(
+            eq(bookingServices.agencyId, agencyId),
+            eq(bookingServices.id, serviceId),
+          ),
+        )
+
+      return this.findById(agencyId, serviceId)
+    },
+
+    async getFieldSchemas(agencyId: string, serviceId: string) {
+      const service = await this.findById(agencyId, serviceId)
+      if (!service) {
+        return null
+      }
+
+      return {
+        quoteFields: parseServiceFieldsJson(service.quoteFieldsSchemaJson),
+        bookingFields: parseServiceFieldsJson(service.bookingFieldsSchemaJson),
+      }
     },
 
     async seedDefaultServices(

@@ -1,9 +1,11 @@
 import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import type { FormEvent } from "react"
 
 import { buttonVariants } from "@/components/ui/button-variants"
+import { ServiceFieldInputs } from "@/features/commercial/ServiceFieldInputs"
 import { cn } from "@/lib/utils"
+import { parseServiceFieldsJson } from "@/shared/commercial/service-fields"
 import { createQuoteFn } from "@/server/services/quotes/actions"
 import { loadQuotesIndexFn } from "@/server/services/quotes/loaders"
 import {
@@ -42,8 +44,21 @@ function QuotesListPage() {
   )
   const [description, setDescription] = useState("")
   const [unitPrice, setUnitPrice] = useState("100.00")
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
   const [message, setMessage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const selectedService = data.bookingServices.find(
+    (service) => service.id === serviceId,
+  )
+  const quoteFields = useMemo(
+    () => parseServiceFieldsJson(selectedService?.quoteFieldsSchemaJson),
+    [selectedService],
+  )
+
+  useEffect(() => {
+    setFieldValues({})
+  }, [serviceId])
 
   const canWrite = hasPermission(permissions, PERMISSION_KEYS["quotes.write"])
 
@@ -67,6 +82,7 @@ function QuotesListPage() {
               description: description || "Line item",
               quantity: 1,
               unitPriceCents,
+              fields: fieldValues,
             },
           ],
         },
@@ -176,6 +192,14 @@ function QuotesListPage() {
               {isSubmitting ? "Creating..." : "Create quote"}
             </button>
           </div>
+          {quoteFields.length > 0 ? (
+            <ServiceFieldInputs
+              fields={quoteFields}
+              values={fieldValues}
+              onChange={setFieldValues}
+              idPrefix="new-quote-fields"
+            />
+          ) : null}
         </form>
       ) : canWrite ? (
         <p className="text-sm text-amber-700">

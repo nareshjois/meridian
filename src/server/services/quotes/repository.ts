@@ -14,6 +14,11 @@ import type {
   QuoteItemInput,
   QuoteListQuery,
 } from "@/shared/validation/dtos/commercial"
+import {
+  parseServiceFieldsJson,
+  serializeFieldValues,
+  validateFieldValues,
+} from "@/shared/commercial/service-fields"
 
 import type { QuoteSummary } from "@/server/services/commercial.contract"
 
@@ -165,11 +170,42 @@ export function createQuoteRepository(db: MeridianDb) {
           quantity: item.quantity,
           unitPriceCents: item.unitPriceCents,
           sortOrder,
+          fieldsJson: serializeFieldValues(item.fields ?? {}),
           createdAt: now,
           updatedAt: now,
         })
         sortOrder += 1
       }
+    },
+
+    async validateQuoteItemFields(agencyId: string, items: QuoteItemInput[]) {
+      for (const item of items) {
+        const [service] = await db
+          .select({
+            name: bookingServices.name,
+            quoteFieldsSchemaJson: bookingServices.quoteFieldsSchemaJson,
+          })
+          .from(bookingServices)
+          .where(
+            and(
+              eq(bookingServices.agencyId, agencyId),
+              eq(bookingServices.id, item.bookingServiceId),
+            ),
+          )
+          .limit(1)
+
+        if (!service) {
+          return `Booking service ${item.bookingServiceId} is missing.`
+        }
+
+        const schema = parseServiceFieldsJson(service.quoteFieldsSchemaJson)
+        const error = validateFieldValues(schema, item.fields ?? {}, "quote")
+        if (error) {
+          return `${service.name}: ${error}`
+        }
+      }
+
+      return null
     },
 
     async recordVersion(

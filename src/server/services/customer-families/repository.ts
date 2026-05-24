@@ -157,6 +157,17 @@ export class CustomerFamilyRepository {
         ),
       )
   }
+
+  async deleteFamily(agencyId: string, familyId: string) {
+    await this.db
+      .delete(customerFamilies)
+      .where(
+        and(
+          eq(customerFamilies.agencyId, agencyId),
+          eq(customerFamilies.id, familyId),
+        ),
+      )
+  }
 }
 
 export function createCustomerFamilyRepository(db: MeridianDb) {

@@ -20,7 +20,12 @@ describe("customer service", () => {
     const created = await customers.createCustomer(ctx, {
       displayName: "Jane Traveler",
       email: "jane@example.com",
-      phone: "+1-555-0100",
+      phoneCountryCode: "+1",
+      phone: "555-0100",
+      city: "Mumbai",
+      state: "Maharashtra",
+      countryCode: "IN",
+      passportNumber: "P1234567",
     })
     expect(created.ok).toBe(true)
 
@@ -66,6 +71,31 @@ describe("customer service", () => {
       expect(result.error.code).toBe("FORBIDDEN")
     }
   })
+
+  it("deletes customers without commercial links", async () => {
+    const db = createTestDb()
+    await seedTestAgency(db)
+    const { customers } = createMeridianServices(db)
+    const session = await loginAsAdmin(db)
+    const ctx = adminContext(session)
+
+    const created = await customers.createCustomer(ctx, {
+      displayName: "Delete Me",
+    })
+    expect(created.ok).toBe(true)
+    if (!created.ok) {
+      return
+    }
+
+    const deleted = await customers.deleteCustomer(ctx, created.data.id)
+    expect(deleted.ok).toBe(true)
+
+    const fetched = await customers.getCustomerById(ctx, created.data.id)
+    expect(fetched.ok).toBe(false)
+    if (!fetched.ok) {
+      expect(fetched.error.code).toBe("NOT_FOUND")
+    }
+  })
 })
 
 describe("customer family service", () => {
@@ -108,6 +138,17 @@ describe("customer family service", () => {
       customerId: customer.data.id,
     })
     expect(removed.ok).toBe(true)
+
+    const deleted = await customerFamilies.deleteFamily(ctx, family.data.id)
+    expect(deleted.ok).toBe(true)
+
+    const families = await customerFamilies.listFamilies(ctx, {})
+    expect(families.ok).toBe(true)
+    if (families.ok) {
+      expect(families.data.items.some((item) => item.id === family.data.id)).toBe(
+        false,
+      )
+    }
   })
 })
 
@@ -147,5 +188,16 @@ describe("group service", () => {
     }
 
     expect(session.user.permissionKeys).toContain(PERMISSION_KEYS["groups.read"])
+
+    const deleted = await groups.deleteGroup(ctx, group.data.id)
+    expect(deleted.ok).toBe(true)
+
+    const afterDelete = await groups.listGroups(ctx, { search: "Spring" })
+    expect(afterDelete.ok).toBe(true)
+    if (afterDelete.ok) {
+      expect(afterDelete.data.items.some((item) => item.id === group.data.id)).toBe(
+        false,
+      )
+    }
   })
 })

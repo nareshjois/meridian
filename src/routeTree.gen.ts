@@ -29,9 +29,11 @@ import { Route as AppUsersUserIdRouteImport } from './routes/app/users/$userId'
 import { Route as AppQuotesQuoteIdRouteImport } from './routes/app/quotes/$quoteId'
 import { Route as AppProfilePasswordRouteImport } from './routes/app/profile/password'
 import { Route as AppGroupsGroupIdRouteImport } from './routes/app/groups/$groupId'
+import { Route as AppCustomersNewRouteImport } from './routes/app/customers/new'
 import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/customers/$customerId'
 import { Route as AppCustomerFamiliesFamilyIdRouteImport } from './routes/app/customer-families/$familyId'
 import { Route as AppBookingsBookingIdRouteImport } from './routes/app/bookings/$bookingId'
+import { Route as AppBookingServicesServiceIdRouteImport } from './routes/app/booking-services/$serviceId'
 import { Route as AppAccountingJournalIndexRouteImport } from './routes/app/accounting/journal/index'
 import { Route as AppAccountingAccountsIndexRouteImport } from './routes/app/accounting/accounts/index'
 import { Route as AppVendorsBillsBillIdRouteImport } from './routes/app/vendors/bills/$billId'
@@ -142,6 +144,11 @@ const AppGroupsGroupIdRoute = AppGroupsGroupIdRouteImport.update({
   path: '/groups/$groupId',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppCustomersNewRoute = AppCustomersNewRouteImport.update({
+  id: '/customers/new',
+  path: '/customers/new',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppCustomersCustomerIdRoute = AppCustomersCustomerIdRouteImport.update({
   id: '/customers/$customerId',
   path: '/customers/$customerId',
@@ -158,6 +165,12 @@ const AppBookingsBookingIdRoute = AppBookingsBookingIdRouteImport.update({
   path: '/bookings/$bookingId',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppBookingServicesServiceIdRoute =
+  AppBookingServicesServiceIdRouteImport.update({
+    id: '/booking-services/$serviceId',
+    path: '/booking-services/$serviceId',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const AppAccountingJournalIndexRoute =
   AppAccountingJournalIndexRouteImport.update({
     id: '/accounting/journal/',
@@ -210,9 +223,11 @@ export interface FileRoutesByFullPath {
   '/auth/activate': typeof AuthActivateRoute
   '/auth/login': typeof AuthLoginRoute
   '/app/': typeof AppIndexRoute
+  '/app/booking-services/$serviceId': typeof AppBookingServicesServiceIdRoute
   '/app/bookings/$bookingId': typeof AppBookingsBookingIdRoute
   '/app/customer-families/$familyId': typeof AppCustomerFamiliesFamilyIdRoute
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/app/customers/new': typeof AppCustomersNewRoute
   '/app/groups/$groupId': typeof AppGroupsGroupIdRoute
   '/app/profile/password': typeof AppProfilePasswordRoute
   '/app/quotes/$quoteId': typeof AppQuotesQuoteIdRoute
@@ -242,9 +257,11 @@ export interface FileRoutesByTo {
   '/auth/activate': typeof AuthActivateRoute
   '/auth/login': typeof AuthLoginRoute
   '/app': typeof AppIndexRoute
+  '/app/booking-services/$serviceId': typeof AppBookingServicesServiceIdRoute
   '/app/bookings/$bookingId': typeof AppBookingsBookingIdRoute
   '/app/customer-families/$familyId': typeof AppCustomerFamiliesFamilyIdRoute
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/app/customers/new': typeof AppCustomersNewRoute
   '/app/groups/$groupId': typeof AppGroupsGroupIdRoute
   '/app/profile/password': typeof AppProfilePasswordRoute
   '/app/quotes/$quoteId': typeof AppQuotesQuoteIdRoute
@@ -276,9 +293,11 @@ export interface FileRoutesById {
   '/auth/activate': typeof AuthActivateRoute
   '/auth/login': typeof AuthLoginRoute
   '/app/': typeof AppIndexRoute
+  '/app/booking-services/$serviceId': typeof AppBookingServicesServiceIdRoute
   '/app/bookings/$bookingId': typeof AppBookingsBookingIdRoute
   '/app/customer-families/$familyId': typeof AppCustomerFamiliesFamilyIdRoute
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/app/customers/new': typeof AppCustomersNewRoute
   '/app/groups/$groupId': typeof AppGroupsGroupIdRoute
   '/app/profile/password': typeof AppProfilePasswordRoute
   '/app/quotes/$quoteId': typeof AppQuotesQuoteIdRoute
@@ -311,9 +330,11 @@ export interface FileRouteTypes {
     | '/auth/activate'
     | '/auth/login'
     | '/app/'
+    | '/app/booking-services/$serviceId'
     | '/app/bookings/$bookingId'
     | '/app/customer-families/$familyId'
     | '/app/customers/$customerId'
+    | '/app/customers/new'
     | '/app/groups/$groupId'
     | '/app/profile/password'
     | '/app/quotes/$quoteId'
@@ -343,9 +364,11 @@ export interface FileRouteTypes {
     | '/auth/activate'
     | '/auth/login'
     | '/app'
+    | '/app/booking-services/$serviceId'
     | '/app/bookings/$bookingId'
     | '/app/customer-families/$familyId'
     | '/app/customers/$customerId'
+    | '/app/customers/new'
     | '/app/groups/$groupId'
     | '/app/profile/password'
     | '/app/quotes/$quoteId'
@@ -376,9 +399,11 @@ export interface FileRouteTypes {
     | '/auth/activate'
     | '/auth/login'
     | '/app/'
+    | '/app/booking-services/$serviceId'
     | '/app/bookings/$bookingId'
     | '/app/customer-families/$familyId'
     | '/app/customers/$customerId'
+    | '/app/customers/new'
     | '/app/groups/$groupId'
     | '/app/profile/password'
     | '/app/quotes/$quoteId'
@@ -553,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGroupsGroupIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/app/customers/new': {
+      id: '/app/customers/new'
+      path: '/customers/new'
+      fullPath: '/app/customers/new'
+      preLoaderRoute: typeof AppCustomersNewRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/app/customers/$customerId': {
       id: '/app/customers/$customerId'
       path: '/customers/$customerId'
@@ -572,6 +604,13 @@ declare module '@tanstack/react-router' {
       path: '/bookings/$bookingId'
       fullPath: '/app/bookings/$bookingId'
       preLoaderRoute: typeof AppBookingsBookingIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/booking-services/$serviceId': {
+      id: '/app/booking-services/$serviceId'
+      path: '/booking-services/$serviceId'
+      fullPath: '/app/booking-services/$serviceId'
+      preLoaderRoute: typeof AppBookingServicesServiceIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/app/accounting/journal/': {
@@ -635,9 +674,11 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
+  AppBookingServicesServiceIdRoute: typeof AppBookingServicesServiceIdRoute
   AppBookingsBookingIdRoute: typeof AppBookingsBookingIdRoute
   AppCustomerFamiliesFamilyIdRoute: typeof AppCustomerFamiliesFamilyIdRoute
   AppCustomersCustomerIdRoute: typeof AppCustomersCustomerIdRoute
+  AppCustomersNewRoute: typeof AppCustomersNewRoute
   AppGroupsGroupIdRoute: typeof AppGroupsGroupIdRoute
   AppProfilePasswordRoute: typeof AppProfilePasswordRoute
   AppQuotesQuoteIdRoute: typeof AppQuotesQuoteIdRoute
@@ -665,9 +706,11 @@ interface AppRouteRouteChildren {
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
+  AppBookingServicesServiceIdRoute: AppBookingServicesServiceIdRoute,
   AppBookingsBookingIdRoute: AppBookingsBookingIdRoute,
   AppCustomerFamiliesFamilyIdRoute: AppCustomerFamiliesFamilyIdRoute,
   AppCustomersCustomerIdRoute: AppCustomersCustomerIdRoute,
+  AppCustomersNewRoute: AppCustomersNewRoute,
   AppGroupsGroupIdRoute: AppGroupsGroupIdRoute,
   AppProfilePasswordRoute: AppProfilePasswordRoute,
   AppQuotesQuoteIdRoute: AppQuotesQuoteIdRoute,

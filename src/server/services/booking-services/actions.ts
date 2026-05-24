@@ -5,6 +5,7 @@ import type { ServiceError } from "@/server/services/_types"
 import type { RouteActionResult, RouteServiceError } from "@/shared/routes/contracts"
 import {
   bookingServiceCreateInputSchema,
+  bookingServiceUpdateFieldsInputSchema,
 } from "@/shared/validation/dtos/commercial"
 import { z } from "zod"
 
@@ -36,6 +37,18 @@ export const setBookingServiceActiveFn = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<RouteActionResult<BookingService>> => {
     const { ctx, services } = await requireCommercialContext()
     const result = await services.bookingServices.setServiceActive(ctx, data)
+    return result.ok
+      ? { ok: true, data: result.data }
+      : { ok: false, error: toActionError(result.error) }
+  })
+
+export const updateBookingServiceFieldsFn = createServerFn({ method: "POST" })
+  .inputValidator((payload: unknown) =>
+    bookingServiceUpdateFieldsInputSchema.parse(payload),
+  )
+  .handler(async ({ data }): Promise<RouteActionResult<BookingService>> => {
+    const { ctx, services } = await requireCommercialContext()
+    const result = await services.bookingServices.updateServiceFields(ctx, data)
     return result.ok
       ? { ok: true, data: result.data }
       : { ok: false, error: toActionError(result.error) }

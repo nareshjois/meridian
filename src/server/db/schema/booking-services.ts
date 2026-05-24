@@ -12,6 +12,12 @@ export const bookingServices = sqliteTable(
     category: text("category").notNull(),
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
     defaultRevenueAccountId: text("default_revenue_account_id"),
+    quoteFieldsSchemaJson: text("quote_fields_schema_json")
+      .notNull()
+      .default("[]"),
+    bookingFieldsSchemaJson: text("booking_fields_schema_json")
+      .notNull()
+      .default("[]"),
     ...timestampColumns,
   },
   (table) => [

@@ -7,6 +7,7 @@ import type {
 import type {
   BookingListQuery,
   BookingServiceCreateInput,
+  BookingServiceUpdateFieldsInput,
   BookingStatusTransitionInput,
   ConvertQuoteToBookingInput,
   QuoteCreateInput,
@@ -21,7 +22,7 @@ import type {
   BookingTraveler,
 } from "@/server/db/schema/bookings"
 import type { Quote, QuoteItem } from "@/server/db/schema/quotes"
-import type { AssignBookingTravelerInput } from "@/shared/validation/dtos/commercial"
+import type { AssignBookingTravelerInput, BookingItemFieldsUpdateInput } from "@/shared/validation/dtos/commercial"
 
 export type QuoteSummary = Quote & {
   customerDisplayName: string
@@ -59,6 +60,14 @@ export interface BookingServiceCatalogContract {
   setServiceActive(
     ctx: ServiceContext,
     input: { serviceId: string; isActive: boolean },
+  ): Promise<MutationResult<BookingService>>
+  getServiceById(
+    ctx: ServiceContext,
+    serviceId: string,
+  ): Promise<ServiceResult<BookingService>>
+  updateServiceFields(
+    ctx: ServiceContext,
+    input: BookingServiceUpdateFieldsInput,
   ): Promise<MutationResult<BookingService>>
 }
 
@@ -106,6 +115,10 @@ export interface BookingServiceContract {
     ctx: ServiceContext,
     input: { bookingId: string; travelerId: string },
   ): Promise<MutationResult<{ success: true }>>
+  updateBookingItemFields(
+    ctx: ServiceContext,
+    input: BookingItemFieldsUpdateInput,
+  ): Promise<MutationResult<BookingDetail>>
 }
 
 export type { BookingServiceCatalogContract as BookingServiceCatalog }

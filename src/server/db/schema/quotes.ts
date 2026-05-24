@@ -44,6 +44,7 @@ export const quoteItems = sqliteTable(
     quantity: integer("quantity").notNull().default(1),
     unitPriceCents: integer("unit_price_cents").notNull(),
     sortOrder: integer("sort_order").notNull().default(0),
+    fieldsJson: text("fields_json").notNull().default("{}"),
     ...timestampColumns,
   },
   (table) => [index("quote_items_quote_id_idx").on(table.quoteId)],

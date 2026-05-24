@@ -67,6 +67,27 @@ export function createCustomerService(db: MeridianDb): CustomerServiceContract {
 
       return serviceOk(customer)
     },
+
+    async deleteCustomer(ctx, customerId) {
+      if (!hasPermission(ctx.permissions, PERMISSION_KEYS["customers.write"])) {
+        return forbidden("Missing permission to delete customers.")
+      }
+
+      const blockers = await repo.getCustomerDeleteBlockers(ctx.agencyId, customerId)
+      if (!blockers.exists) {
+        return serviceErr({ code: "NOT_FOUND", message: "Customer not found." })
+      }
+
+      if (blockers.blockers.length > 0) {
+        return serviceErr({
+          code: "CONFLICT",
+          message: `Cannot delete customer while linked to ${blockers.blockers.join(", ")}.`,
+        })
+      }
+
+      await repo.deleteCustomer(ctx.agencyId, customerId)
+      return serviceOk({ success: true })
+    },
   }
 }
 

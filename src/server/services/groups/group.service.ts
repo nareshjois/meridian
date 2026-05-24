@@ -149,6 +149,28 @@ export function createGroupService(db: MeridianDb): GroupServiceContract & {
       const items = await repo.listMembers(ctx.agencyId, groupId)
       return serviceOk(items)
     },
+
+    async deleteGroup(ctx, groupId) {
+      if (!hasPermission(ctx.permissions, PERMISSION_KEYS["groups.write"])) {
+        return forbidden("Missing permission to delete groups.")
+      }
+
+      const group = await repo.findGroupById(ctx.agencyId, groupId)
+      if (!group) {
+        return serviceErr({ code: "NOT_FOUND", message: "Group not found." })
+      }
+
+      const blockers = await repo.getGroupDeleteBlockers(ctx.agencyId, groupId)
+      if (blockers.blockers.length > 0) {
+        return serviceErr({
+          code: "CONFLICT",
+          message: `Cannot delete group while linked to ${blockers.blockers.join(", ")}.`,
+        })
+      }
+
+      await repo.deleteGroup(ctx.agencyId, groupId)
+      return serviceOk({ success: true })
+    },
   }
 }
 

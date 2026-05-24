@@ -67,6 +67,7 @@ export const appRouteLabels: Record<string, string> = {
   app: "Dashboard",
   users: "Team members",
   customers: "Customers",
+  new: "Add customer",
   "customer-families": "Families",
   groups: "Groups",
   "booking-services": "Booking services",

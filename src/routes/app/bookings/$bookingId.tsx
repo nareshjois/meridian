@@ -3,6 +3,7 @@ import { useState } from "react"
 import type { FormEvent } from "react"
 
 import { buttonVariants } from "@/components/ui/button-variants"
+import { BookingItemFieldsEditor } from "@/features/commercial/BookingItemFieldsEditor"
 import { cn } from "@/lib/utils"
 import {
   assignBookingTravelerFn,
@@ -168,30 +169,32 @@ function BookingDetailPage() {
         </p>
       ) : null}
 
-      <div className="overflow-hidden rounded-lg border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/40 text-left">
-            <tr>
-              <th className="px-4 py-3 font-medium">Description</th>
-              <th className="px-4 py-3 font-medium">Qty</th>
-              <th className="px-4 py-3 font-medium">Line total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {booking.items.map((item) => (
-              <tr key={item.id} className="border-t border-border">
-                <td className="px-4 py-3">{item.description}</td>
-                <td className="px-4 py-3">{item.quantity}</td>
-                <td className="px-4 py-3">
-                  {formatMoney(
-                    item.quantity * item.unitPriceCents,
-                    booking.currency,
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="space-y-4">
+        {booking.items.map((item) => (
+          <div
+            key={item.id}
+            className="rounded-lg border border-border p-4 text-sm"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <p className="font-medium">{item.description}</p>
+              <p>
+                {item.quantity} ×{" "}
+                {formatMoney(item.unitPriceCents, booking.currency)} ={" "}
+                {formatMoney(
+                  item.quantity * item.unitPriceCents,
+                  booking.currency,
+                )}
+              </p>
+            </div>
+            <BookingItemFieldsEditor
+              bookingId={bookingId}
+              item={item}
+              serviceSchema={data.serviceSchemas[item.bookingServiceId]}
+              canWrite={canWrite}
+              onSaved={() => router.invalidate()}
+            />
+          </div>
+        ))}
       </div>
 
       <div className="space-y-3">

@@ -1,10 +1,12 @@
-import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
-import type { FormEvent } from "react"
+import { Link, createFileRoute } from "@tanstack/react-router"
 
+import { Button } from "@/components/ui/button"
 import { buttonVariants } from "@/components/ui/button-variants"
 import { cn } from "@/lib/utils"
-import { createCustomerFn } from "@/server/services/customers/actions"
+import {
+  formatCustomerLocation,
+  formatCustomerPhone,
+} from "@/shared/geo/countries"
 import { loadCustomersIndexFn } from "@/server/services/customers/loaders"
 import {
   PERMISSION_KEYS,
@@ -30,58 +32,29 @@ export const Route = createFileRoute("/app/customers/")({
 })
 
 function CustomersListPage() {
-  const router = useRouter()
   const search = Route.useSearch()
   const { data } = Route.useLoaderData()
   const { permissions } = Route.useRouteContext()
-  const [displayName, setDisplayName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [message, setMessage] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const canWrite = hasPermission(permissions, PERMISSION_KEYS["customers.write"])
 
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!canWrite) {
-      return
-    }
-
-    setIsSubmitting(true)
-    setMessage("")
-
-    try {
-      const result = await createCustomerFn({
-        data: {
-          displayName,
-          email: email || undefined,
-          phone: phone || undefined,
-        },
-      })
-
-      if (!result.ok) {
-        setMessage(result.error.message)
-        return
-      }
-
-      setMessage(`Created ${result.data.displayName}.`)
-      setDisplayName("")
-      setEmail("")
-      setPhone("")
-      await router.invalidate()
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
   return (
     <section className="space-y-8">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Customers</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage customer records, contacts, and CRM data.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight">Customers</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage customer records, contacts, and CRM data.
+          </p>
+        </div>
+        {canWrite ? (
+          <Link
+            to="/app/customers/new"
+            className={cn(buttonVariants(), "h-10 px-4")}
+          >
+            Add customer
+          </Link>
+        ) : null}
       </div>
 
       <form className="flex flex-wrap items-end gap-3" method="get">
@@ -91,7 +64,7 @@ function CustomersListPage() {
             name="search"
             defaultValue={search.search ?? ""}
             className="h-10 rounded-md border border-border bg-background px-3"
-            placeholder="Name, email, or phone"
+            placeholder="Name, email, phone, passport, city"
           />
         </label>
         <label className="space-y-1 text-sm">
@@ -106,56 +79,10 @@ function CustomersListPage() {
             <option value="inactive">Inactive</option>
           </select>
         </label>
-        <button
-          type="submit"
-          className={cn(buttonVariants({ variant: "outline" }), "h-10")}
-        >
+        <Button type="submit" variant="outline" className="h-10">
           Filter
-        </button>
+        </Button>
       </form>
-
-      {canWrite ? (
-        <form
-          onSubmit={handleCreate}
-          className="space-y-3 rounded-lg border border-border p-4"
-        >
-          <h2 className="font-medium">New customer</h2>
-          <div className="flex flex-wrap gap-3">
-            <input
-              required
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-              placeholder="Display name"
-              className="h-10 flex-1 rounded-md border border-border bg-background px-3"
-            />
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Email (optional)"
-              className="h-10 flex-1 rounded-md border border-border bg-background px-3"
-            />
-            <input
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder="Phone (optional)"
-              className="h-10 flex-1 rounded-md border border-border bg-background px-3"
-            />
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={cn(buttonVariants(), "h-10")}
-            >
-              {isSubmitting ? "Creating..." : "Create customer"}
-            </button>
-          </div>
-          {message ? (
-            <p className="text-sm text-muted-foreground" aria-live="polite">
-              {message}
-            </p>
-          ) : null}
-        </form>
-      ) : null}
 
       <div className="overflow-hidden rounded-lg border border-border">
         <table className="w-full text-sm">
@@ -164,6 +91,7 @@ function CustomersListPage() {
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Email</th>
               <th className="px-4 py-3 font-medium">Phone</th>
+              <th className="px-4 py-3 font-medium">Location</th>
               <th className="px-4 py-3 font-medium">Status</th>
             </tr>
           </thead>
@@ -183,7 +111,15 @@ function CustomersListPage() {
                   {customer.email ?? "—"}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {customer.phone ?? "—"}
+                  {formatCustomerPhone(customer.phoneCountryCode, customer.phone) ??
+                    "—"}
+                </td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  {formatCustomerLocation(
+                    customer.city,
+                    customer.state,
+                    customer.countryCode,
+                  ) ?? "—"}
                 </td>
                 <td className="px-4 py-3 capitalize">{customer.status}</td>
               </tr>

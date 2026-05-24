@@ -156,6 +156,22 @@ export function createCustomerFamilyService(db: MeridianDb): CustomerFamilyServi
       const items = await repo.listMembers(ctx.agencyId, familyId)
       return serviceOk(items)
     },
+
+    async deleteFamily(ctx, familyId) {
+      if (
+        !hasPermission(ctx.permissions, PERMISSION_KEYS["customer_families.write"])
+      ) {
+        return forbidden("Missing permission to delete customer families.")
+      }
+
+      const family = await repo.findFamilyById(ctx.agencyId, familyId)
+      if (!family) {
+        return serviceErr({ code: "NOT_FOUND", message: "Family not found." })
+      }
+
+      await repo.deleteFamily(ctx.agencyId, familyId)
+      return serviceOk({ success: true })
+    },
   }
 }
 

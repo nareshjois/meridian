@@ -185,5 +185,35 @@ export function createBookingService(
       )
       return serviceOk({ success: true })
     },
+
+    async updateBookingItemFields(ctx, input) {
+      if (!hasPermission(ctx.permissions, PERMISSION_KEYS["bookings.write"])) {
+        return forbidden("Missing permission to update booking items.")
+      }
+
+      try {
+        const updated = await repo.updateBookingItemFields({
+          agencyId: ctx.agencyId,
+          bookingId: input.bookingId,
+          itemId: input.itemId,
+          fields: input.fields,
+        })
+
+        if (!updated) {
+          return serviceErr({
+            code: "NOT_FOUND",
+            message: "Booking item not found.",
+          })
+        }
+
+        return serviceOk(updated)
+      } catch (error) {
+        return serviceErr({
+          code: "VALIDATION_ERROR",
+          message:
+            error instanceof Error ? error.message : "Invalid booking fields.",
+        })
+      }
+    },
   }
 }

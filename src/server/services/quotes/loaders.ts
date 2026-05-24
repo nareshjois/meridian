@@ -5,6 +5,7 @@ import { assertPermission, PERMISSION_KEYS } from "@/shared/permissions"
 import type { AppLoaderResult } from "@/shared/routes/contracts"
 import { idSchema } from "@/shared/validation/common"
 import { quoteListQuerySchema } from "@/shared/validation/dtos/commercial"
+import { buildServiceSchemaMap } from "@/shared/commercial/service-schema-map"
 
 import { getDb } from "@/server/db/client"
 
@@ -69,14 +70,22 @@ export const loadQuoteDetailFn = createServerFn({ method: "POST" })
 
     const bookingRepo = createBookingRepository(getDb())
     const linked = await bookingRepo.findByQuoteId(ctx.agencyId, data.quoteId)
+    const servicesResult = await services.bookingServices.listServices(ctx, {
+      includeInactive: true,
+    })
+    if (!servicesResult.ok) {
+      throw new Error(servicesResult.error.message)
+    }
 
     return {
       data: {
         quote: result.data,
         linkedBookingId: linked?.id ?? null,
+        serviceSchemas: buildServiceSchemaMap(servicesResult.data.items),
       },
     } satisfies AppLoaderResult<{
       quote: (typeof result)["data"]
       linkedBookingId: string | null
+      serviceSchemas: ReturnType<typeof buildServiceSchemaMap>
     }>
   })

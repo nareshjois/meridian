@@ -88,5 +88,74 @@ export function createBookingServiceCatalog(
 
       return serviceOk(updated)
     },
+
+    async getServiceById(ctx, serviceId) {
+      if (
+        !hasPermission(ctx.permissions, PERMISSION_KEYS["booking_services.read"])
+      ) {
+        return forbidden("Missing permission to view booking services.")
+      }
+
+      const service = await repo.findById(ctx.agencyId, serviceId)
+      if (!service) {
+        return serviceErr({
+          code: "NOT_FOUND",
+          message: "Booking service not found.",
+        })
+      }
+
+      return serviceOk(service)
+    },
+
+    async updateServiceFields(ctx, input) {
+      if (
+        !hasPermission(ctx.permissions, PERMISSION_KEYS["booking_services.write"])
+      ) {
+        return forbidden("Missing permission to update booking services.")
+      }
+
+      const service = await repo.findById(ctx.agencyId, input.serviceId)
+      if (!service) {
+        return serviceErr({
+          code: "NOT_FOUND",
+          message: "Booking service not found.",
+        })
+      }
+
+      const quoteKeys = new Set<string>()
+      for (const field of input.quoteFields) {
+        if (quoteKeys.has(field.key)) {
+          return serviceErr({
+            code: "VALIDATION_ERROR",
+            message: `Duplicate quote field key "${field.key}".`,
+          })
+        }
+        quoteKeys.add(field.key)
+      }
+
+      const bookingKeys = new Set<string>()
+      for (const field of input.bookingFields) {
+        if (bookingKeys.has(field.key)) {
+          return serviceErr({
+            code: "VALIDATION_ERROR",
+            message: `Duplicate booking field key "${field.key}".`,
+          })
+        }
+        bookingKeys.add(field.key)
+      }
+
+      const updated = await repo.updateFieldSchemas(ctx.agencyId, input.serviceId, {
+        quoteFields: input.quoteFields,
+        bookingFields: input.bookingFields,
+      })
+      if (!updated) {
+        return serviceErr({
+          code: "NOT_FOUND",
+          message: "Booking service not found.",
+        })
+      }
+
+      return serviceOk(updated)
+    },
   }
 }

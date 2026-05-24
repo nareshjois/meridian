@@ -88,3 +88,26 @@ export const updateCustomerFn = createServerFn({ method: "POST" })
         >)
       : ({ ok: false as const, error: toActionError(result.error) })
   })
+
+const deleteCustomerPayloadSchema = z.object({
+  customerId: idSchema,
+})
+
+export const deleteCustomerFn = createServerFn({ method: "POST" })
+  .inputValidator((payload: unknown) => deleteCustomerPayloadSchema.parse(payload))
+  .handler(async ({ data }) => {
+    const session = await requireSessionContext()
+    if (!session.ok) {
+      return session
+    }
+
+    const result = await session.customers.deleteCustomer(
+      session.ctx,
+      data.customerId,
+    )
+    return result.ok
+      ? ({ ok: true as const, data: result.data } satisfies RouteActionResult<
+          (typeof result)["data"]
+        >)
+      : ({ ok: false as const, error: toActionError(result.error) })
+  })

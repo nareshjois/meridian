@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router"
+import { Link, createFileRoute, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import type { FormEvent } from "react"
 
@@ -161,7 +161,15 @@ function BookingServicesPage() {
           <tbody>
             {data.services.items.map((service) => (
               <tr key={service.id} className="border-t border-border">
-                <td className="px-4 py-3 font-mono text-xs">{service.code}</td>
+                <td className="px-4 py-3 font-mono text-xs">
+                  <Link
+                    to="/app/booking-services/$serviceId"
+                    params={{ serviceId: service.id }}
+                    className="hover:underline"
+                  >
+                    {service.code}
+                  </Link>
+                </td>
                 <td className="px-4 py-3">{service.name}</td>
                 <td className="px-4 py-3 capitalize">{service.category}</td>
                 <td className="px-4 py-3 capitalize">
@@ -169,7 +177,15 @@ function BookingServicesPage() {
                 </td>
                 {canWrite ? (
                   <td className="px-4 py-3">
-                    <button
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        to="/app/booking-services/$serviceId"
+                        params={{ serviceId: service.id }}
+                        className={cn(buttonVariants({ variant: "outline" }), "h-8")}
+                      >
+                        Fields
+                      </Link>
+                      <button
                       type="button"
                       className={cn(buttonVariants({ variant: "outline" }), "h-8")}
                       onClick={() =>
@@ -178,6 +194,7 @@ function BookingServicesPage() {
                     >
                       {service.isActive ? "Deactivate" : "Activate"}
                     </button>
+                    </div>
                   </td>
                 ) : null}
               </tr>

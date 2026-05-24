@@ -106,3 +106,26 @@ export const removeFamilyMemberFn = createServerFn({ method: "POST" })
         >)
       : ({ ok: false as const, error: toActionError(result.error) })
   })
+
+const deleteFamilyPayloadSchema = z.object({
+  familyId: idSchema,
+})
+
+export const deleteCustomerFamilyFn = createServerFn({ method: "POST" })
+  .inputValidator((payload: unknown) => deleteFamilyPayloadSchema.parse(payload))
+  .handler(async ({ data }) => {
+    const session = await requireSessionContext()
+    if (!session.ok) {
+      return session
+    }
+
+    const result = await session.customerFamilies.deleteFamily(
+      session.ctx,
+      data.familyId,
+    )
+    return result.ok
+      ? ({ ok: true as const, data: result.data } satisfies RouteActionResult<
+          (typeof result)["data"]
+        >)
+      : ({ ok: false as const, error: toActionError(result.error) })
+  })

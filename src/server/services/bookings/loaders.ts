@@ -5,6 +5,7 @@ import { assertPermission, PERMISSION_KEYS } from "@/shared/permissions"
 import type { AppLoaderResult } from "@/shared/routes/contracts"
 import { idSchema } from "@/shared/validation/common"
 import { bookingListQuerySchema } from "@/shared/validation/dtos/commercial"
+import { buildServiceSchemaMap } from "@/shared/commercial/service-schema-map"
 
 import { requireCommercialContext } from "../commercial/auth-context"
 
@@ -36,13 +37,14 @@ export const loadBookingDetailFn = createServerFn({ method: "POST" })
     const { ctx, services } = await requireCommercialContext()
     assertPermission(ctx.permissions, PERMISSION_KEYS["bookings.read"])
 
-    const [bookingResult, customersResult] = await Promise.all([
+    const [bookingResult, customersResult, servicesResult] = await Promise.all([
       services.bookings.getBookingById(ctx, data.bookingId),
       services.customers.listCustomers(ctx, {
         page: 1,
         pageSize: 100,
         sortDirection: "asc",
       }),
+      services.bookingServices.listServices(ctx, { includeInactive: true }),
     ])
 
     if (!bookingResult.ok) {
@@ -51,14 +53,19 @@ export const loadBookingDetailFn = createServerFn({ method: "POST" })
     if (!customersResult.ok) {
       throw new Error(customersResult.error.message)
     }
+    if (!servicesResult.ok) {
+      throw new Error(servicesResult.error.message)
+    }
 
     return {
       data: {
         booking: bookingResult.data,
         customers: customersResult.data.items,
+        serviceSchemas: buildServiceSchemaMap(servicesResult.data.items),
       },
     } satisfies AppLoaderResult<{
       booking: (typeof bookingResult)["data"]
       customers: (typeof customersResult)["data"]["items"]
+      serviceSchemas: ReturnType<typeof buildServiceSchemaMap>
     }>
   })

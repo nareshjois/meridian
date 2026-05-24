@@ -6,6 +6,7 @@ import type { ServiceError } from "@/server/services/_types"
 import type { RouteActionResult, RouteServiceError } from "@/shared/routes/contracts"
 import {
   assignBookingTravelerInputSchema,
+  bookingItemFieldsUpdateSchema,
   bookingStatusTransitionSchema,
   removeBookingTravelerInputSchema,
 } from "@/shared/validation/dtos/commercial"
@@ -47,6 +48,18 @@ export const removeBookingTravelerFn = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<RouteActionResult<{ success: true }>> => {
     const { ctx, services } = await requireCommercialContext()
     const result = await services.bookings.removeTraveler(ctx, data)
+    return result.ok
+      ? { ok: true, data: result.data }
+      : { ok: false, error: toActionError(result.error) }
+  })
+
+export const updateBookingItemFieldsFn = createServerFn({ method: "POST" })
+  .inputValidator((payload: unknown) =>
+    bookingItemFieldsUpdateSchema.parse(payload),
+  )
+  .handler(async ({ data }) => {
+    const { ctx, services } = await requireCommercialContext()
+    const result = await services.bookings.updateBookingItemFields(ctx, data)
     return result.ok
       ? { ok: true, data: result.data }
       : { ok: false, error: toActionError(result.error) }

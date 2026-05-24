@@ -97,6 +97,17 @@ export function createQuoteService(db: MeridianDb): QuoteService {
         })
       }
 
+      const fieldError = await repo.validateQuoteItemFields(
+        ctx.agencyId,
+        input.items,
+      )
+      if (fieldError) {
+        return serviceErr({
+          code: "VALIDATION_ERROR",
+          message: fieldError,
+        })
+      }
+
       const quote = await repo.createQuote(
         ctx.agencyId,
         ctx.actorUserId,

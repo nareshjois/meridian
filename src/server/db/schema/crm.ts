@@ -9,7 +9,14 @@ export const customers = sqliteTable(
     agencyId: agencyIdColumn(),
     displayName: text("display_name").notNull(),
     email: text("email"),
+    phoneCountryCode: text("phone_country_code").notNull().default("+91"),
     phone: text("phone"),
+    address: text("address"),
+    city: text("city"),
+    state: text("state"),
+    countryCode: text("country_code").notNull().default("IN"),
+    dateOfBirth: text("date_of_birth"),
+    passportNumber: text("passport_number"),
     status: text("status", { enum: ["active", "inactive"] })
       .notNull()
       .default("active"),

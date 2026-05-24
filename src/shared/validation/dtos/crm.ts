@@ -7,16 +7,46 @@ import {
   nonEmptyStringSchema,
 } from "../common"
 
-export const customerCreateInputSchema = z.object({
-  displayName: nonEmptyStringSchema,
+const optionalTrimmedStringSchema = z.string().trim().optional()
+
+const countryCodeSchema = z
+  .string()
+  .trim()
+  .length(2, "Country code must be ISO 3166-1 alpha-2")
+
+const phoneCountryCodeSchema = z
+  .string()
+  .trim()
+  .regex(/^\+\d{1,4}$/, "Dial code must start with + followed by digits")
+
+const dateOfBirthSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be YYYY-MM-DD")
+  .optional()
+
+export const customerProfileFieldsSchema = z.object({
   email: emailSchema.optional(),
-  phone: z.string().trim().optional(),
+  phoneCountryCode: phoneCountryCodeSchema.optional(),
+  phone: optionalTrimmedStringSchema,
+  address: optionalTrimmedStringSchema,
+  city: optionalTrimmedStringSchema,
+  state: optionalTrimmedStringSchema,
+  countryCode: countryCodeSchema.optional(),
+  dateOfBirth: dateOfBirthSchema,
+  passportNumber: optionalTrimmedStringSchema,
+})
+
+export const customerCreateInputSchema = customerProfileFieldsSchema.extend({
+  displayName: nonEmptyStringSchema,
 })
 export type CustomerCreateInput = z.infer<typeof customerCreateInputSchema>
 
-export const customerUpdateInputSchema = customerCreateInputSchema.partial().extend({
-  status: z.enum(["active", "inactive"]).optional(),
-})
+export const customerUpdateInputSchema = customerCreateInputSchema
+  .partial()
+  .extend({
+    status: z.enum(["active", "inactive"]).optional(),
+  })
 export type CustomerUpdateInput = z.infer<typeof customerUpdateInputSchema>
 
 export const customerListQuerySchema = createListQuerySchema({

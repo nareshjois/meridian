@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { bookingServiceFieldDefinitionSchema } from "@/shared/commercial/service-fields"
 import {
   createListQuerySchema,
   currencyCodeSchema,
@@ -8,23 +9,54 @@ import {
   nonEmptyStringSchema,
 } from "../common"
 
+export const bookingServiceFieldsInputSchema = z.object({
+  quoteFields: z.array(bookingServiceFieldDefinitionSchema).default([]),
+  bookingFields: z.array(bookingServiceFieldDefinitionSchema).default([]),
+})
+export type BookingServiceFieldsInput = z.infer<
+  typeof bookingServiceFieldsInputSchema
+>
+
 export const bookingServiceCreateInputSchema = z.object({
   code: nonEmptyStringSchema,
   name: nonEmptyStringSchema,
   category: nonEmptyStringSchema,
   defaultRevenueAccountId: idSchema.optional(),
+  quoteFields: z.array(bookingServiceFieldDefinitionSchema).optional(),
+  bookingFields: z.array(bookingServiceFieldDefinitionSchema).optional(),
 })
 export type BookingServiceCreateInput = z.infer<
   typeof bookingServiceCreateInputSchema
 >
+
+export const bookingServiceUpdateFieldsInputSchema = z.object({
+  serviceId: idSchema,
+  quoteFields: z.array(bookingServiceFieldDefinitionSchema),
+  bookingFields: z.array(bookingServiceFieldDefinitionSchema),
+})
+export type BookingServiceUpdateFieldsInput = z.infer<
+  typeof bookingServiceUpdateFieldsInputSchema
+>
+
+const serviceFieldValuesSchema = z.record(z.string(), z.string())
 
 export const quoteItemInputSchema = z.object({
   bookingServiceId: idSchema,
   description: nonEmptyStringSchema,
   quantity: z.number().int().min(1).default(1),
   unitPriceCents: moneyCentsSchema,
+  fields: serviceFieldValuesSchema.optional(),
 })
 export type QuoteItemInput = z.infer<typeof quoteItemInputSchema>
+
+export const bookingItemFieldsUpdateSchema = z.object({
+  bookingId: idSchema,
+  itemId: idSchema,
+  fields: serviceFieldValuesSchema,
+})
+export type BookingItemFieldsUpdateInput = z.infer<
+  typeof bookingItemFieldsUpdateSchema
+>
 
 export const quoteCreateInputSchema = z.object({
   customerId: idSchema,

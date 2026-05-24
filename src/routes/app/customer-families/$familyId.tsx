@@ -3,8 +3,10 @@ import { useState } from "react"
 
 import { buttonVariants } from "@/components/ui/button-variants"
 import { cn } from "@/lib/utils"
+import { DeleteEntityButton } from "@/features/crm/DeleteEntityButton"
 import {
   addFamilyMemberFn,
+  deleteCustomerFamilyFn,
   removeFamilyMemberFn,
 } from "@/server/services/customer-families/actions"
 import { loadCustomerFamilyDetailFn } from "@/server/services/customer-families/loaders"
@@ -177,6 +179,15 @@ function CustomerFamilyDetailPage() {
         <p className="text-sm text-muted-foreground" aria-live="polite">
           {message}
         </p>
+      ) : null}
+
+      {canWrite ? (
+        <DeleteEntityButton
+          entityLabel="family"
+          confirmMessage={`Delete ${data.family.name}? Member links will be removed.`}
+          onDelete={() => deleteCustomerFamilyFn({ data: { familyId } })}
+          onSuccess={() => router.navigate({ to: "/app/customer-families" })}
+        />
       ) : null}
     </section>
   )

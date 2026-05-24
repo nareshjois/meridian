@@ -1,18 +1,29 @@
 import { and, count, desc, eq, like, or } from "drizzle-orm"
 
 import type { MeridianDb } from "@/server/db/client"
+import { bookings, bookingTravelers } from "@/server/db/schema/bookings"
 import { customers } from "@/server/db/schema/crm"
+import { formRequests } from "@/server/db/schema/forms"
+import { quotes } from "@/server/db/schema/quotes"
 import type {
   CustomerCreateInput,
   CustomerListQuery,
   CustomerUpdateInput,
 } from "@/shared/validation/dtos/crm"
 
+import {
+  buildCustomerInsertValues,
+  buildCustomerUpdateValues,
+} from "./customer-values"
+
 export type CustomerSummary = {
   id: string
   displayName: string
   email: string | null
+  phoneCountryCode: string
   phone: string | null
+  city: string | null
+  countryCode: string
   status: "active" | "inactive"
 }
 
@@ -33,6 +44,8 @@ export class CustomerRepository {
           like(customers.displayName, pattern),
           like(customers.email, pattern),
           like(customers.phone, pattern),
+          like(customers.passportNumber, pattern),
+          like(customers.city, pattern),
         )!,
       )
     }
@@ -72,16 +85,9 @@ export class CustomerRepository {
     const id = crypto.randomUUID()
     const now = new Date()
 
-    await this.db.insert(customers).values({
-      id,
-      agencyId,
-      displayName: input.displayName.trim(),
-      email: input.email?.trim().toLowerCase() ?? null,
-      phone: input.phone?.trim() ?? null,
-      status: "active",
-      createdAt: now,
-      updatedAt: now,
-    })
+    await this.db
+      .insert(customers)
+      .values(buildCustomerInsertValues(agencyId, input, id, now))
 
     const created = await this.findCustomerById(agencyId, id)
     if (!created) {
@@ -103,19 +109,7 @@ export class CustomerRepository {
 
     await this.db
       .update(customers)
-      .set({
-        displayName: input.displayName?.trim() ?? existing.displayName,
-        email:
-          input.email !== undefined
-            ? (input.email?.trim().toLowerCase() ?? null)
-            : existing.email,
-        phone:
-          input.phone !== undefined
-            ? (input.phone?.trim() ?? null)
-            : existing.phone,
-        status: input.status ?? existing.status,
-        updatedAt: new Date(),
-      })
+      .set(buildCustomerUpdateValues(existing, input))
       .where(eq(customers.id, customerId))
 
     return this.findCustomerById(agencyId, customerId)
@@ -146,6 +140,82 @@ export class CustomerRepository {
       .where(and(...filters))
       .orderBy(customers.displayName)
       .limit(50)
+  }
+
+  async getCustomerDeleteBlockers(agencyId: string, customerId: string) {
+    const whereCustomer = and(
+      eq(customers.agencyId, agencyId),
+      eq(customers.id, customerId),
+    )
+
+    const [[quoteRow], [bookingRow], [travelerRow], [formRow]] = await Promise.all([
+      this.db
+        .select({ total: count() })
+        .from(quotes)
+        .where(and(eq(quotes.agencyId, agencyId), eq(quotes.customerId, customerId))),
+      this.db
+        .select({ total: count() })
+        .from(bookings)
+        .where(
+          and(eq(bookings.agencyId, agencyId), eq(bookings.customerId, customerId)),
+        ),
+      this.db
+        .select({ total: count() })
+        .from(bookingTravelers)
+        .where(
+          and(
+            eq(bookingTravelers.agencyId, agencyId),
+            eq(bookingTravelers.customerId, customerId),
+          ),
+        ),
+      this.db
+        .select({ total: count() })
+        .from(formRequests)
+        .where(
+          and(
+            eq(formRequests.agencyId, agencyId),
+            eq(formRequests.customerId, customerId),
+          ),
+        ),
+    ])
+
+    const blockers: string[] = []
+    const quoteCount = quoteRow?.total ?? 0
+    const bookingCount = bookingRow?.total ?? 0
+    const travelerCount = travelerRow?.total ?? 0
+    const formCount = formRow?.total ?? 0
+
+    if (quoteCount > 0) {
+      blockers.push(`${quoteCount} quote${quoteCount === 1 ? "" : "s"}`)
+    }
+    if (bookingCount > 0) {
+      blockers.push(`${bookingCount} booking${bookingCount === 1 ? "" : "s"}`)
+    }
+    if (travelerCount > 0) {
+      blockers.push(
+        `${travelerCount} booking traveler record${travelerCount === 1 ? "" : "s"}`,
+      )
+    }
+    if (formCount > 0) {
+      blockers.push(`${formCount} form request${formCount === 1 ? "" : "s"}`)
+    }
+
+    const [customerRow] = await this.db
+      .select({ id: customers.id })
+      .from(customers)
+      .where(whereCustomer)
+      .limit(1)
+
+    return {
+      exists: Boolean(customerRow),
+      blockers,
+    }
+  }
+
+  async deleteCustomer(agencyId: string, customerId: string) {
+    await this.db
+      .delete(customers)
+      .where(and(eq(customers.agencyId, agencyId), eq(customers.id, customerId)))
   }
 }
 

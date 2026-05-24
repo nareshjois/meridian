@@ -8,8 +8,15 @@ import {
   bookingStatusHistory,
   bookingTravelers,
 } from "@/server/db/schema/bookings"
+import {
+  mergeFieldValuesForBookingConversion,
+  parseFieldValuesJson,
+  serializeFieldValues,
+  validateFieldValues,
+} from "@/shared/commercial/service-fields"
 import type { BookingListQuery } from "@/shared/validation/dtos/commercial"
 import type { QuoteRepository } from "../quotes/repository"
+import { createBookingServiceRepository } from "../booking-services/repository"
 
 import type { BookingSummary } from "@/server/services/commercial.contract"
 
@@ -170,7 +177,22 @@ export function createBookingRepository(db: MeridianDb) {
       })
 
       let sortOrder = 0
+      const serviceRepo = createBookingServiceRepository(db)
+
       for (const item of input.quote.items) {
+        const schemas = await serviceRepo.getFieldSchemas(
+          input.agencyId,
+          item.bookingServiceId,
+        )
+        const quoteValues = parseFieldValuesJson(item.fieldsJson)
+        const mergedValues = schemas
+          ? mergeFieldValuesForBookingConversion(
+              quoteValues,
+              schemas.quoteFields,
+              schemas.bookingFields,
+            )
+          : quoteValues
+
         await db.insert(bookingItems).values({
           id: crypto.randomUUID(),
           agencyId: input.agencyId,
@@ -180,6 +202,7 @@ export function createBookingRepository(db: MeridianDb) {
           quantity: item.quantity,
           unitPriceCents: item.unitPriceCents,
           sortOrder,
+          fieldsJson: serializeFieldValues(mergedValues),
           createdAt: now,
           updatedAt: now,
         })
@@ -274,6 +297,55 @@ export function createBookingRepository(db: MeridianDb) {
             eq(bookingTravelers.id, travelerId),
           ),
         )
+    },
+
+    async updateBookingItemFields(input: {
+      agencyId: string
+      bookingId: string
+      itemId: string
+      fields: Record<string, string>
+    }) {
+      const booking = await this.findBookingById(input.agencyId, input.bookingId)
+      if (!booking) {
+        return null
+      }
+
+      const item = booking.items.find((row) => row.id === input.itemId)
+      if (!item) {
+        return null
+      }
+
+      const serviceRepo = createBookingServiceRepository(db)
+      const schemas = await serviceRepo.getFieldSchemas(
+        input.agencyId,
+        item.bookingServiceId,
+      )
+      if (!schemas) {
+        return null
+      }
+
+      const error = validateFieldValues(
+        schemas.bookingFields,
+        input.fields,
+        "booking",
+      )
+      if (error) {
+        throw new Error(error)
+      }
+
+      const now = new Date()
+      await db
+        .update(bookingItems)
+        .set({ fieldsJson: serializeFieldValues(input.fields), updatedAt: now })
+        .where(
+          and(
+            eq(bookingItems.agencyId, input.agencyId),
+            eq(bookingItems.bookingId, input.bookingId),
+            eq(bookingItems.id, input.itemId),
+          ),
+        )
+
+      return this.findBookingById(input.agencyId, input.bookingId)
     },
   }
 }

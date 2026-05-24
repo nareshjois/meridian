@@ -3,7 +3,12 @@ import { useState } from "react"
 
 import { buttonVariants } from "@/components/ui/button-variants"
 import { cn } from "@/lib/utils"
-import { addGroupMemberFn, removeGroupMemberFn } from "@/server/services/groups/actions"
+import { DeleteEntityButton } from "@/features/crm/DeleteEntityButton"
+import {
+  addGroupMemberFn,
+  deleteGroupFn,
+  removeGroupMemberFn,
+} from "@/server/services/groups/actions"
 import { loadGroupDetailFn } from "@/server/services/groups/loaders"
 import {
   PERMISSION_KEYS,
@@ -166,6 +171,15 @@ function GroupDetailPage() {
         <p className="text-sm text-muted-foreground" aria-live="polite">
           {message}
         </p>
+      ) : null}
+
+      {canWrite ? (
+        <DeleteEntityButton
+          entityLabel="group"
+          confirmMessage={`Delete ${data.group.name}? Members and itineraries will be removed.`}
+          onDelete={() => deleteGroupFn({ data: { groupId } })}
+          onSuccess={() => router.navigate({ to: "/app/groups" })}
+        />
       ) : null}
     </section>
   )
