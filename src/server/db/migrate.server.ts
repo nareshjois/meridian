@@ -3,7 +3,8 @@ import { fileURLToPath } from "node:url"
 
 import { migrate } from "drizzle-orm/better-sqlite3/migrator"
 
-import { getDb } from "./client"
+import { getDb, initDb } from "./client"
+import { isD1Driver } from "./driver"
 
 const migrationsFolder = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -14,6 +15,13 @@ let migrated = false
 
 export async function ensureDatabaseMigrated() {
   if (migrated) {
+    return
+  }
+
+  await initDb()
+
+  if (isD1Driver()) {
+    migrated = true
     return
   }
 

@@ -1,55 +1,47 @@
-import { mkdirSync } from "node:fs"
-import path from "node:path"
+import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3"
 
-import Database from "better-sqlite3"
-import { drizzle } from "drizzle-orm/better-sqlite3"
-
+import { isD1Driver } from "./driver.ts"
 import * as schema from "./schema/index.ts"
 
-const defaultDatabasePath = "./data/meridian.sqlite"
+/** Canonical app DB type (sqlite driver). D1 instances are cast at the boundary. */
+export type MeridianDb = BetterSQLite3Database<typeof schema>
 
-function resolveDatabasePath() {
-  return process.env.DATABASE_URL ?? defaultDatabasePath
-}
+let dbInstance: MeridianDb | null = null
 
-function ensureDatabaseDirectory(databasePath: string) {
-  if (databasePath === ":memory:" || databasePath.startsWith("file:")) {
+export async function initDb(): Promise<void> {
+  if (dbInstance) {
     return
   }
 
-  const directory = path.dirname(databasePath)
-  if (directory && directory !== ".") {
-    mkdirSync(directory, { recursive: true })
-  }
-}
-
-let sqlite: Database.Database | null = null
-let db: ReturnType<typeof drizzle<typeof schema>> | null = null
-
-export function getSqlite() {
-  if (!sqlite) {
-    const databasePath = resolveDatabasePath()
-    ensureDatabaseDirectory(databasePath)
-    sqlite = new Database(databasePath)
-    sqlite.pragma("journal_mode = WAL")
-    sqlite.pragma("foreign_keys = ON")
+  if (isD1Driver()) {
+    const { getD1Db } = await import("@meridian/db-d1")
+    dbInstance = getD1Db() as unknown as MeridianDb
+    return
   }
 
-  return sqlite
+  const { getSqliteDb } = await import("@meridian/db-sqlite")
+  dbInstance = getSqliteDb()
 }
 
-export function getDb() {
-  if (!db) {
-    db = drizzle(getSqlite(), { schema })
+export function getDb(): MeridianDb {
+  if (!dbInstance) {
+    throw new Error("Database is not initialized. Call initDb() first.")
   }
 
-  return db
+  return dbInstance
 }
-
-export type MeridianDb = ReturnType<typeof getDb>
 
 export function closeDb() {
-  sqlite?.close()
-  sqlite = null
-  db = null
+  if (isD1Driver()) {
+    dbInstance = null
+    return
+  }
+
+  void import("@meridian/db-sqlite").then(({ closeSqliteDb }) => {
+    closeSqliteDb()
+  })
+  dbInstance = null
 }
+
+export { isD1Driver, resolveDbDriver } from "./driver.ts"
+export type { DbDriver } from "./driver.ts"

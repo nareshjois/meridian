@@ -5,13 +5,19 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
+    "build:cloudflare": "MERIDIAN_CLOUDFLARE=1 MERIDIAN_DB_DRIVER=d1 vite build",
     "preview": "vite preview",
+    "preview:cloudflare": "MERIDIAN_CLOUDFLARE=1 MERIDIAN_DB_DRIVER=d1 vite preview",
+    "deploy": "pnpm build:cloudflare && wrangler deploy",
+    "cf-typegen": "wrangler types",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:d1:local": "wrangler d1 migrations apply meridian --local",
+    "db:migrate:d1:remote": "wrangler d1 migrations apply meridian --remote",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
@@ -30,7 +36,6 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.16.0",
-    "nitro": "latest",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "shadcn": "^4.8.0",
@@ -41,6 +46,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.38.0",
     "@tanstack/devtools-vite": "^0.6.0",
     "@tanstack/eslint-config": "^0.4.0",
     "@testing-library/dom": "^10.4.1",
@@ -57,6 +63,7 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^3.2.4",
-    "web-vitals": "^5.1.0"
+    "web-vitals": "^5.1.0",
+    "wrangler": "^4.94.0"
   }
 }

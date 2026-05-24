@@ -1,5 +1,12 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "eslint.config.js", "prettier.config.js", "vite.config.js"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "eslint.config.js",
+    "prettier.config.js",
+    "vite.config.js",
+    "worker-configuration.d.ts"
+  ],
 
   "compilerOptions": {
     "target": "ES2022",
@@ -24,7 +31,9 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@meridian/db-sqlite": ["./src/server/db/client.sqlite.ts"],
+      "@meridian/db-d1": ["./src/server/db/client.d1.ts"]
     }
   }
 }

@@ -22,19 +22,49 @@ Full MVP scope and parallel workstream plan:
 | `pnpm dev` | Dev server at `http://localhost:3000` |
 | `pnpm typecheck` | TypeScript check |
 | `pnpm test` | Vitest (unit + service tests) |
-| `pnpm build` | Production build (client + SSR + Nitro) |
+| `pnpm build` | Local production build (Node SSR) |
+| `pnpm build:cloudflare` | Cloudflare Workers build |
+| `pnpm deploy` | Build for Cloudflare and deploy with Wrangler |
+| `pnpm preview:cloudflare` | Preview Cloudflare build locally |
+| `pnpm cf-typegen` | Generate Cloudflare binding types |
 | `pnpm lint` | ESLint |
 | `pnpm db:generate` | Generate Drizzle migrations from schema |
-| `pnpm db:migrate` | Apply migrations (CLI; app also migrates on boot) |
+| `pnpm db:migrate` | Apply migrations to local SQLite (CLI; app also migrates on boot) |
+| `pnpm db:migrate:d1:local` | Apply migrations to local D1 (Wrangler) |
+| `pnpm db:migrate:d1:remote` | Apply migrations to remote D1 |
 | `pnpm db:studio` | Drizzle Studio |
 
-**Before claiming work is done:** run `pnpm typecheck`, `pnpm test`, and `pnpm build`.
+**Before claiming work is done:** run `pnpm typecheck`, `pnpm test`, and `pnpm build` (or `pnpm build:cloudflare` for deploy-related changes).
 
 If tests fail with `better-sqlite3` bindings missing, build the native addon:
 
 ```bash
 cd node_modules/.pnpm/better-sqlite3@*/node_modules/better-sqlite3 && npm run build-release
 ```
+
+---
+
+## Cloudflare deployment
+
+Local dev stays on **file SQLite** (`pnpm dev`). Production targets **Cloudflare Workers + D1**.
+
+| Setting | Local dev | Cloudflare |
+|---------|-----------|------------|
+| DB driver | `sqlite` (default) | `d1` via `wrangler.jsonc` vars |
+| Database | `./data/meridian.sqlite` | D1 binding `DB` |
+| Migrations | Runtime on boot + `pnpm db:migrate` | `pnpm db:migrate:d1:remote` at deploy |
+
+**One-time setup:**
+
+```bash
+wrangler login
+wrangler d1 create meridian   # copy database_id into wrangler.jsonc
+pnpm cf-typegen
+pnpm db:migrate:d1:remote
+pnpm deploy
+```
+
+Dual-driver code lives in `src/server/db/client.ts` (sqlite via `better-sqlite3`, D1 via `drizzle-orm/d1` + `cloudflare:workers` env binding). Cloudflare builds set `MERIDIAN_CLOUDFLARE=1` and `MERIDIAN_DB_DRIVER=d1` so `better-sqlite3` is not bundled.
 
 ---
 
